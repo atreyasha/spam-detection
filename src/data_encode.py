@@ -82,7 +82,7 @@ def integerEncode(vocab_size=5000, padding_body = 500, padding_subject = 50):
                                      for el in ls[0]] for ls in X_test],maxlen=padding_subject)
     X_test_body = pad_sequences([[tokens_common[el] if el in tokens_common.keys() else unknown_token 
                                   for el in ls[1]] for ls in X_test], maxlen=padding_body)
-    # save all numpy arrays to fileS
+    # save all numpy arrays to file
     np.save("./data/X_train_subject.npy", X_train_subject)
     np.save("./data/X_valid_subject.npy", X_valid_subject)
     np.save("./data/X_test_subject.npy", X_test_subject)
@@ -96,10 +96,14 @@ def integerEncode(vocab_size=5000, padding_body = 500, padding_subject = 50):
     with open("./data/integer_index.pickle", "wb") as f:
         pickle.dump(tokens_common, f, protocol=pickle.HIGHEST_PROTOCOL)
 
+##############################
+# main command call
+##############################
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--vocab-size", type=int, default = 5000,
-                        help="size of vocabulary used in word vector embedding <default:5000>")
+                            help="size of vocabulary used in word vector embedding <default:5000>")
     parser.add_argument("--padding-body", type=int, default = 500,
                         help="maximum length of email body padding <default:500>")
     parser.add_argument("--padding-subject", type=int, default = 50,
