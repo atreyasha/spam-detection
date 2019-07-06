@@ -9,10 +9,14 @@
 * but very large maximum sequence length
 
 ### Word embeddings
-* initialize with glove embeddings and train from there
-* make two sets of word vectors, for body and subject
+* utilize character embeddings and check potential/generality
+* if good, can extrapolate by using FLAIR pre-trained character embeddings for initialization
+* initialize with glove embeddings and train from there, for word vectors
+* make two sets of word vectors, for body and subject
 * use NER tagger to remove named entities for more generality
-* think of unknown word handling, maybe skip or add unknown vector or character embedding
+* think of unknown word handling, maybe skip or add unknown vector
+* possible to use half-known words and half-unknown words both initialized with pre-trained embeddings (only known will be trained)
+* possible to also use stacked character and word embeddings for robustness and semantic scope
 
 ### Model comparison
 * uniform classifier will already have 50% accuracy, or can be exactly calculated
