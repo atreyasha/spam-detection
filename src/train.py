@@ -60,34 +60,38 @@ def getModel(subtype = "words", embedding_vector_size = 100, droprate = 0.2):
     if subtype == "words":
         vocab_size = 5001
         max_text_length = 500
-        model = Sequential()
-        model.add(Embedding(vocab_size, embedding_vector_size, input_length=max_text_length))
-        model.add(Conv1D(filters=32, kernel_size=3, padding='same'))
-        model.add(Conv1D(filters=64, kernel_size=3, padding='same'))
-        model.add(Activation("relu"))
-        model.add(Dropout(droprate))
-        model.add(MaxPooling1D(pool_size=2))
-        if len(backend.tensorflow_backend._get_available_gpus()) > 0:
-            model.add(CuDNNLSTM(100))
-            model.add(Dropout(droprate))
-        else:
-            model.add(LSTM(100, recurrent_dropout=droprate))
-        model.add(Dense(50))
-        model.add(Activation("relu"))
-        model.add(Dense(1))
-        model.add(Activation("sigmoid"))
-        return model
+    elif subtype == "char":
+        vocab_size = 66
+        max_text_length = 1000
     else:
-        pass
+        raise NameError("no such option provided: "+str(subtype))
+    model = Sequential()
+    model.add(Embedding(vocab_size, embedding_vector_size, input_length=max_text_length))
+    model.add(Conv1D(filters=32, kernel_size=3, padding='same'))
+    model.add(Conv1D(filters=64, kernel_size=3, padding='same'))
+    model.add(Activation("relu"))
+    model.add(Dropout(droprate))
+    model.add(MaxPooling1D(pool_size=2))
+    if len(backend.tensorflow_backend._get_available_gpus()) > 0:
+        model.add(CuDNNLSTM(100))
+        model.add(Dropout(droprate))
+    else:
+        model.add(LSTM(100, recurrent_dropout=droprate))
+    model.add(Dense(50))
+    model.add(Activation("relu"))
+    model.add(Dense(1))
+    model.add(Activation("sigmoid"))
+    return model
 
 def singleRun(subtype="words"):
-    X_train, X_valid, X_test, y_train, y_valid, y_test = load_data(subtype)
+    if subtype in ["words", "char"]:
+        X_train, X_valid, X_test, y_train, y_valid, y_test = load_data(subtype)
     model = getModel(subtype)
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['accuracy'])
-    model.fit(X_train, y_train, epochs=3, batch_size=256, 
+    model.fit(X_train, y_train, epochs=3, batch_size=256,
                         validation_data=(X_valid, y_valid), shuffle=True)
     scores = model.evaluate(X_test, y_test, verbose=1)
-    print("Accuracy: %s %" % scores[1])
+    print("Accuracy: " + str(scores[1]*100) + "%")
     return model
 
 def gridSearch(subtype="words"):
