@@ -122,8 +122,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--vocab-size", type=int, default = 5000,
                             help="size of vocabulary used in word vector embedding <default:5000>")
-    parser.add_argument("--padding", type=int, default = 500,
-                        help="maximum length of email padding <default:500>")
+    parser.add_argument("--padding-tokens", type=int, default = 500,
+                        help="maximum length of email padding for tokens <default:500>")
+    parser.add_argument("--padding-char", type=int, default = 1000,
+                        help="maximum length of email padding for characters <default:1000>")
     args = parser.parse_args()
     # execute main command
-    integerEncode(vocab_size=args.vocab_size, padding=args.padding)
+    integerEncode(vocab_size=args.vocab_size, padding_words=args.padding_tokens, padding_chars=args.padding_char)
