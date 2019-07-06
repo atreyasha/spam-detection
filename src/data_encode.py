@@ -97,9 +97,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
     # execute main command
     integerEncode(vocab_size=args.vocab_size, padding=args.padding)
-    
-###############################
-# comments/to-dos
-###############################
-
-# TODO: update local readme before commit, for data generation

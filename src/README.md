@@ -15,9 +15,7 @@ optional arguments:
   --padding PADDING     maximum length of email padding <default:500>
 ```
 
-Currently, we only support word integer encoding, but the development of character-based encodings is underway.
-
-In order to encode the enron-spam emails, execute the following command:
+Currently, we only support word integer encoding, but the development of character-based encodings is underway. In order to encode the enron-spam emails, execute the following command:
 
 ```shell
 $ python3 data_encode.py
