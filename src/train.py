@@ -163,11 +163,19 @@ def gridSearch(subtype="words"):
                                  ModelCheckpoint(filepath='./pickles/'+current_time+'/best_model_'
                                                  +str(counter)+'.h5', monitor='val_acc', save_best_only=True)]
                     model.compile(optimizer=Adam(lr=l), loss="binary_crossentropy", metrics=['accuracy'])
-                    history = model.fit(X_train, y_train, epochs=50, batch_size=b, 
-                                             validation_data=(X_valid, y_valid), shuffle=True,
-                                             callbacks=callbacks)
+                    if subtype in ["words","char"]:
+                        history = model.fit(X_train, y_train, epochs=50, batch_size=b,
+                                            validation_data=(X_valid, y_valid), shuffle=True,
+                                            callbacks=callbacks)
+                        scores = model.evaluate(X_test, y_test, verbose=1)
+                        print("Accuracy: " + str(scores[1]*100) + "%")
+                    elif subtype == "all":
+                        history = model.fit([X_train[0],X_train[1]], y_train, epochs=50, batch_size=b,
+                                            validation_data=([X_valid[0],X_valid[1]], y_valid), shuffle=True,
+                                            callbacks=callbacks)
+                        scores = model.evaluate([X_test[0],X_test[1]], y_test, verbose=1)
+                        print("Accuracy: " + str(scores[1]*100) + "%")
                     max_index = np.argmax(history.history["val_acc"])
-                    scores = model.evaluate(X_test, y_test, verbose=1)
                     best_test.append(scores[1])
                     best.append([history.history["acc"][max_index],history.history["val_acc"][max_index],scores[1]])
                     if np.argmax(best_test) == counter:
@@ -178,7 +186,7 @@ def gridSearch(subtype="words"):
                     else:
                         os.remove('./pickles/'+current_time+'/best_model_'+str(counter)+'.h5')
                     # write to csv file in loop
-                    writer.writerow({"model":str(counter), "embedding_size":str(e), "droprate":str(d), 
+                    writer.writerow({"model":str(counter), "embedding_size":str(e), "droprate":str(d),
                                      "batch_size":str(b), "learning_rate":str(l),
                                      "best_train":str(best[counter][0]), "best_val":str(best[counter][1]), 
                                      "best_test":str(best[counter][2])})
