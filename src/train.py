@@ -13,11 +13,12 @@ import numpy as np
 from glob import glob
 from keras import backend
 from keras import layers, models
+from keras.models import Model
 from keras.optimizers import Adam
 from keras.utils import plot_model
 from keras.models import Sequential
-from keras.layers import Dense, Activation
-from keras.layers import LSTM, Dropout, CuDNNLSTM
+from keras.layers import Dense, Activation, concatenate
+from keras.layers import LSTM, Dropout, CuDNNLSTM, Input
 from keras.layers.embeddings import Embedding
 from keras.layers.convolutional import Conv1D
 from keras.layers.convolutional import MaxPooling1D
@@ -56,42 +57,80 @@ def load_data(subtype="words"):
 def getCurrentTime():
     return datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     
-def getModel(subtype = "words", embedding_vector_size = 100, droprate = 0.2):
-    if subtype == "words":
-        vocab_size = 5001
-        max_text_length = 500
-    elif subtype == "char":
-        vocab_size = 66
-        max_text_length = 1000
-    else:
-        raise NameError("no such option provided: "+str(subtype))
-    model = Sequential()
-    model.add(Embedding(vocab_size, embedding_vector_size, input_length=max_text_length))
-    model.add(Conv1D(filters=32, kernel_size=3, padding='same'))
-    model.add(Conv1D(filters=64, kernel_size=3, padding='same'))
-    model.add(Activation("relu"))
-    model.add(Dropout(droprate))
-    model.add(MaxPooling1D(pool_size=2))
-    if len(backend.tensorflow_backend._get_available_gpus()) > 0:
-        model.add(CuDNNLSTM(100))
+def getModel(subtype = "words", embedding_vector_size = 100, droprate = 0.2, vocab_size_tokens = 5001,
+             max_text_length_tokens = 500, vocab_size_char = 66, max_text_length_char = 1000):
+    if subtype in ["words","char"]:
+        model = Sequential()
+        if subtype == "words":
+            model.add(Embedding(vocab_size_tokens, embedding_vector_size, input_length=max_text_length_tokens))
+        elif subtype == "char":
+            model.add(Embedding(vocab_size_char, embedding_vector_size, input_length=max_text_length_char))
+        model.add(Conv1D(filters=32, kernel_size=3, padding='same'))
+        model.add(Conv1D(filters=64, kernel_size=3, padding='same'))
+        model.add(Activation("relu"))
         model.add(Dropout(droprate))
-    else:
-        model.add(LSTM(100, recurrent_dropout=droprate))
-    model.add(Dense(50))
-    model.add(Activation("relu"))
-    model.add(Dense(1))
-    model.add(Activation("sigmoid"))
-    return model
+        model.add(MaxPooling1D(pool_size=2))
+        if len(backend.tensorflow_backend._get_available_gpus()) > 0:
+            model.add(CuDNNLSTM(100))
+            model.add(Dropout(droprate))
+        else:
+            model.add(LSTM(100, recurrent_dropout=droprate))
+        model.add(Dense(50))
+        model.add(Activation("relu"))
+        model.add(Dense(1))
+        model.add(Activation("sigmoid"))
+        return model
+    elif subtype == "all":
+        # define token-based model
+        input_tokens = Input(shape=(max_text_length_tokens,))
+        tokens = Embedding(vocab_size_tokens, embedding_vector_size, input_length=max_text_length_tokens)(input_tokens)
+        tokens = Conv1D(filters=32, kernel_size=3, padding='same')(tokens)
+        tokens = Conv1D(filters=64, kernel_size=3, padding='same')(tokens)
+        tokens = Activation("relu")(tokens)
+        tokens = Dropout(droprate)(tokens)
+        tokens = MaxPooling1D(pool_size=2)(tokens)
+        if len(backend.tensorflow_backend._get_available_gpus()) > 0:
+            tokens = CuDNNLSTM(100)(tokens)
+            tokens = Dropout(droprate)(tokens)
+        else:
+            tokens = LSTM(100, recurrent_dropout=droprate)(tokens)
+        tokens = Model(inputs=input_tokens,outputs=tokens)
+        # define-character based model
+        input_char = Input(shape=(max_text_length_char,))
+        char = Embedding(vocab_size_char, embedding_vector_size, input_length=max_text_length_char)(input_char)
+        char = Conv1D(filters=32, kernel_size=3, padding='same')(char)
+        char = Conv1D(filters=64, kernel_size=3, padding='same')(char)
+        char = Activation("relu")(char)
+        char = Dropout(droprate)(char)
+        char = MaxPooling1D(pool_size=2)(char)
+        if len(backend.tensorflow_backend._get_available_gpus()) > 0:
+            char = CuDNNLSTM(100)(char)
+            char = Dropout(droprate)(char)
+        else:
+            char = LSTM(100, recurrent_dropout=droprate)(char)
+        char = Model(inputs=input_char,outputs=char)
+        combined = concatenate([tokens.output, char.output])
+        combined = Dense(50)(combined)
+        combined = Activation("relu")(combined)
+        combined = Dense(1)(combined)
+        combined = Activation("sigmoid")(combined)
+        model = Model(inputs=[tokens.input, char.input], outputs=combined)
+        return model
 
 def singleRun(subtype="words"):
-    if subtype in ["words", "char"]:
-        X_train, X_valid, X_test, y_train, y_valid, y_test = load_data(subtype)
+    X_train, X_valid, X_test, y_train, y_valid, y_test = load_data(subtype)
     model = getModel(subtype)
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['accuracy'])
-    model.fit(X_train, y_train, epochs=3, batch_size=256,
-                        validation_data=(X_valid, y_valid), shuffle=True)
-    scores = model.evaluate(X_test, y_test, verbose=1)
-    print("Accuracy: " + str(scores[1]*100) + "%")
+    if subtype in ["words","char"]:
+        model.fit(X_train, y_train, epochs=3, batch_size=256,
+                            validation_data=(X_valid, y_valid), shuffle=True)
+        scores = model.evaluate(X_test, y_test, verbose=1)
+        print("Accuracy: " + str(scores[1]*100) + "%")
+    elif subtype == "all":
+        model.fit([X_train[0],X_train[1]], y_train, epochs=3, batch_size=256,
+                            validation_data=([X_valid[0],X_valid[1]], y_valid), shuffle=True)
+        scores = model.evaluate([X_test[0],X_test[1]], y_test, verbose=1)
+        print("Accuracy: " + str(scores[1]*100) + "%")
     return model
 
 def gridSearch(subtype="words"):
@@ -106,10 +145,10 @@ def gridSearch(subtype="words"):
     writer.writeheader()
     csvfile.flush()
     # define grid parameters
-    embedding_size = [50,100,300]
-    droprate = np.linspace(0.1,0.4,4)
-    batch_size = [128,256,384]
-    learning_rate = np.linspace(0.001,0.01,4)
+    embedding_size = [100,300]
+    droprate = np.linspace(0.1,0.3,3)
+    batch_size = [128,256]
+    learning_rate = np.linspace(0.001,0.006,3)
     counter = 0
     best = []
     best_test = []
