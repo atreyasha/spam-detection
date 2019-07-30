@@ -1,35 +1,26 @@
-## Notes for model development
+## Notes for model development and comparison
 
 ### Architecture
-* hypertune runs to find best models for subject and body separately
-* then combine to see if subject and body together can outperform
-* set baselines with individual runs
-* can compare with model based on character embeddings
-* smaller vocabulary of just pure possible elements with spaces included
-* but very large maximum sequence length
+* hypertune runs to find best models, set baselines with individual runs
+* bidirectional and attention elements can further improve performance
 
-### Word embeddings
-* utilize character embeddings and check potential/generality
-* if good, can extrapolate by using FLAIR pre-trained character embeddings for initialization
+### Word/character/byte embeddings
+* utilize character/byte embeddings and check potential/generality, avoids spelling mistakes
+* extrapolate by using FLAIR pre-trained character embeddings for initialization
 * initialize with glove embeddings and train from there, for word vectors
-* make two sets of word vectors, for body and subject
-* use NER tagger to remove named entities for more generality
-* think of unknown word handling, maybe skip or add unknown vector
-* possible to use half-known words and half-unknown words both initialized with pre-trained embeddings (only known will be trained)
 * possible to also use stacked character and word embeddings for robustness and semantic scope
+* make kernel size and strides larger in character convolutions
 
 ### Model comparison
 * uniform classifier will already have 50% accuracy, or can be exactly calculated
-* compare with bag-of-words with SVM
-* what can be done to make the model more general
+* compare with bag-of-words on SVM vs. sequential RNN, most likely SVM will exceed
+* attain blind-dataset to check robustness of RNNs vs SVMs, use same pre-processing as per enron dataset
+* tendency to flag largely misspelled emails, might result in RNN being more robust on blind dataset
 
-### Additional
-* try attention-based mechanism
-* maybe add language as additional input
-* only use spam filter if unknown address or not yourself
+### Extras
 * put error message if model cannot be compiled due to conflicting vocab size
 
-### Interesting and challenging
-* check if spam model can actually re-generate spam text, which would be interesting
-* would need a better technique of unknown word handling due to them turning up in generated text
-* maybe can add multiple unknown tokens to spice things up
+### Assumptions
+* no name or email address of sender, classify only based on content of email
+* assume pre-processed format as provided by 2006 paper authors
+* assume language is English and sender address is unknown, as known senders would not be spam-checked
