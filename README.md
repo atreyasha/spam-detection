@@ -1,4 +1,4 @@
-## Comparison of sequential and non-sequential models for supervised spam classification (Enron-spam dataset)
+## Comparison of LSTM-CNN (sequential) vs. SVM (non-sequential) models for supervised spam classification
 
 The central objective of this repository is to shed light and provide evidence on whether sequential learning is inherently important for the task of supervised spam classification. This is done by implementing a sequential CNN-LSTM model and comparing it with a non-sequential SVM classifier. Aspects such as generalization accuracy and robustness of these models will be explored in this repository.
 

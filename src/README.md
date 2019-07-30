@@ -1,4 +1,4 @@
-## Comparison of sequential and non-sequential models for supervised spam classification (Enron-spam dataset)
+## Comparison of LSTM-CNN (sequential) vs. SVM (non-sequential) models for supervised spam classification
 
 ### Table of Contents
 
@@ -10,7 +10,7 @@
 
 Before running the models, we would need to preprocess our text based data for model training. 
 
-#### Integer encoding for CNN-LSTM
+#### 1.1. Integer encoding for CNN-LSTM
 
 To preprocess data for our sequential model, we define a helper function in `integer_encode.py`:
 
@@ -37,7 +37,7 @@ Running this function will encode the enron-spam dataset as integer-based tokens
 ```shell
 $ python3 integer_encode.py
 ```
-#### Bag-of-words encoding for SVM
+#### 1.2. Bag-of-words encoding for SVM
 
 To preprocess data for our non-sequential model, we define a helper function in `bag_words.py`:
 
