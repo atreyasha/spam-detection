@@ -123,7 +123,7 @@ def bagWords(vocab_size=5000):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--vocab-size", type=int, default = 5000,
-                            help="size of vocabulary used in word vector embedding <default:5000>")
+                            help="size of vocabulary used in bag-of-words encoding <default:5000>")
     args = parser.parse_args()
     # execute main command
     bagWords(vocab_size=args.vocab_size)

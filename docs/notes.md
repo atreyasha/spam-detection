@@ -3,6 +3,7 @@
 ### Architecture
 * hypertune runs to find best models, set baselines with individual runs
 * bidirectional and attention elements can further improve performance
+* attention can be dropped and character/word embeddings to keep
 
 ### Word/character/byte embeddings
 * utilize character/byte embeddings and check potential/generality, avoids spelling mistakes

@@ -10,12 +10,12 @@
 
 Before running the models, we would need to preprocess our text based data for model training. 
 
-#### 1.1. Integer encoding for CNN-LSTM
+#### 1.1. Sequence encoding for CNN-LSTM
 
-To preprocess data for our sequential model, we define a helper function in `integer_encode.py`:
+To preprocess data for our sequential model, we define a helper function in `sequence_encode.py`:
 
 ```
-usage: integer_encode.py [-h] [--vocab-size VOCAB_SIZE]
+usage: sequence_encode.py [-h] [--vocab-size VOCAB_SIZE]
                          [--padding-tokens PADDING_TOKENS]
                          [--padding-char PADDING_CHAR]
 
@@ -35,7 +35,7 @@ optional arguments:
 Running this function will encode the enron-spam dataset as integer-based tokens and characters. The two sets of encodings will be saved in the `./data/rnn` directory. An example of running this function is show below:
 
 ```shell
-$ python3 integer_encode.py
+$ python3 sequence_encode.py
 ```
 #### 1.2. Bag-of-words encoding for SVM
 

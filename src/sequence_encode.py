@@ -12,7 +12,7 @@ from pathlib import Path
 from collections import Counter
 from keras.preprocessing.text import text_to_word_sequence
 from keras.preprocessing.sequence import pad_sequences
-from sklearn.model_selection import train_test_split 
+from sklearn.model_selection import train_test_split
 
 ##############################
 # define key functions
