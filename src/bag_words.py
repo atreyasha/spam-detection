@@ -55,7 +55,11 @@ def tokenize(obj):
         nltk.download("stopwords")
     for el in tqdm(obj):
         int_store = []
-        res = nltk.pos_tag(text_to_word_sequence(el))
+        try:
+            res = nltk.pos_tag(text_to_word_sequence(el))
+        except LookupError:
+            nltk.download('averaged_perceptron_tagger')
+            res = nltk.pos_tag(text_to_word_sequence(el))
         for tup in res:
             if tup[0].isalpha() and tup[0] not in nltk.corpus.stopwords.words('english'):
                 int_store.append(lem.lemmatize(tup[0], _get_wordnet_pos(tup[1])))
