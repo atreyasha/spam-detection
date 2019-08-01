@@ -36,20 +36,20 @@ def load_data(subtype="words"):
     np.load = lambda *a,**k: np_load_old(*a, allow_pickle=True,**k)
     # call load_data with allow_pickle implicitly set to true
     if subtype == "words":
-        X_train = np.load("./data/words/X_train.npy")
-        X_valid = np.load("./data/words/X_valid.npy")
-        X_test = np.load("./data/words/X_test.npy")
+        X_train = np.load("./data/rnn/words/X_train.npy")
+        X_valid = np.load("./data/rnn/words/X_valid.npy")
+        X_test = np.load("./data/rnn/words/X_test.npy")
     elif subtype == "char":
-        X_train = np.load("./data/char/X_train.npy")
-        X_valid = np.load("./data/char/X_valid.npy")
-        X_test = np.load("./data/char/X_test.npy")
+        X_train = np.load("./data/rnn/char/X_train.npy")
+        X_valid = np.load("./data/rnn/char/X_valid.npy")
+        X_test = np.load("./data/rnn/char/X_test.npy")
     elif subtype == "all":
-        X_train = (np.load("./data/words/X_train.npy"),np.load("./data/char/X_train.npy"))
-        X_valid = (np.load("./data/words/X_valid.npy"),np.load("./data/char/X_valid.npy"))
-        X_test = (np.load("./data/words/X_test.npy"),np.load("./data/char/X_test.npy"))
-    y_train = np.load("./data/y_train.npy")
-    y_valid = np.load("./data/y_valid.npy")
-    y_test = np.load("./data/y_test.npy")
+        X_train = (np.load("./data/rnn/words/X_train.npy"),np.load("./data/rnn/char/X_train.npy"))
+        X_valid = (np.load("./data/rnn/words/X_valid.npy"),np.load("./data/rnn/char/X_valid.npy"))
+        X_test = (np.load("./data/rnn/words/X_test.npy"),np.load("./data/rnn/char/X_test.npy"))
+    y_train = np.load("./data/rnn/y_train.npy")
+    y_valid = np.load("./data/rnn/y_valid.npy")
+    y_test = np.load("./data/rnn/y_test.npy")
     # restore np.load for future normal usage
     np.load = np_load_old
     return X_train, X_valid, X_test, y_train, y_valid, y_test
