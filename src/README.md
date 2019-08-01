@@ -1,4 +1,4 @@
-## Comparison of LSTM-CNN (sequential) vs. SVM (non-sequential) models for supervised spam classification
+## Comparison of SVM (non-sequential) vs. CNN-LSTM (sequential) models for supervised spam classification
 
 ### 1. Data preprocessing
 
