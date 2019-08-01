@@ -52,6 +52,12 @@ Running this function will encode the enron-spam dataset as integer-based tokens
 $ python3 sequence_encode.py
 ```
 
+In addition, it would be required to run `char_embedding_gen.py" in order to produce approximate character embeddings from glove word embeddings. To do this, please run:
+
+```shell
+$ python3 char_embedding_gen.py
+```
+
 ### 2. Model training
 
 The following scripts/functions conduct grid-searches over various hyperparameters to train a SVM and CNN-LSTM.

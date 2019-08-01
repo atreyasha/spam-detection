@@ -7,12 +7,10 @@
 
 import os
 import csv
-import pickle
 import argparse
 import datetime
 import numpy as np
 from glob import glob
-from tqdm import tqdm
 from keras import backend
 from keras import layers, models
 from keras.models import Model
@@ -56,44 +54,20 @@ def load_data(subtype="words"):
     np.load = np_load_old
     return X_train, X_valid, X_test, y_train, y_valid, y_test
 
-def embeddingMatrix(embedding_vector_size=300):
-    # adapted from https://machinelearningmastery.com/use-word-embedding-layers-deep-learning-keras/
-    # load the whole embedding into memory
-    with open("./data/rnn/words/integer_index_tokens.pickle","rb") as f:
-        words_index = pickle.load(f)
-    embeddings_index = dict()
-    with open("./data/glove.6B."+str(embedding_vector_size)+"d.txt") as f:
-        for line in tqdm(f):
-            values = line.split()
-            word = values[0]
-            if word in words_index:
-                coefs = np.asarray(values[1:], dtype='float32')
-                embeddings_index[word] = coefs
-    # create a weight matrix for words in training docs
-    embedding_matrix = np.zeros((len(words_index.keys())+1, embedding_vector_size))
-    # initialize null token
-    embedding_matrix[0] = np.random.normal(size=(embedding_vector_size,))
-    for word, i in words_index.items():
-        embedding_vector = embeddings_index.get(word)
-        if embedding_vector is not None:
-            embedding_matrix[i] = embedding_vector
-        else:
-            embedding_matrix[i] = np.random.normal(size=(embedding_vector_size,))
-    return embedding_matrix
-        
 def getCurrentTime():
     return datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     
-def getModel(subtype = "words", embedding_vector_size = 300, droprate = 0.2, vocab_size_tokens = 5000,
-             max_text_length_tokens = 500, vocab_size_char = 66, max_text_length_char = 1000):
+def getModel(embedding_matrix_words,embedding_matrix_char,
+             subtype = "words", embedding_vector_size = 300, droprate = 0.2, vocab_size_tokens = 5000,
+             max_text_length_tokens = 500, vocab_size_char = 65, max_text_length_char = 1000):
     if subtype in ["words","char"]:
         model = Sequential()
         if subtype == "words":
-            embedding_matrix = embeddingMatrix(embedding_vector_size)
             model.add(Embedding(vocab_size_tokens, embedding_vector_size,
-                                input_length=max_text_length_tokens, weights=[embedding_matrix]))
+                                input_length=max_text_length_tokens, weights=[embedding_matrix_words]))
         elif subtype == "char":
-            model.add(Embedding(vocab_size_char, embedding_vector_size, input_length=max_text_length_char))
+            model.add(Embedding(vocab_size_char, embedding_vector_size, input_length=max_text_length_char,
+                                weights=[embedding_matrix_char]))
         model.add(Conv1D(filters=32, kernel_size=3, padding='same'))
         model.add(Conv1D(filters=64, kernel_size=3, padding='same'))
         model.add(Activation("relu"))
@@ -112,7 +86,8 @@ def getModel(subtype = "words", embedding_vector_size = 300, droprate = 0.2, voc
     elif subtype == "all":
         # define token-based model
         input_tokens = Input(shape=(max_text_length_tokens,))
-        tokens = Embedding(vocab_size_tokens, embedding_vector_size, input_length=max_text_length_tokens)(input_tokens)
+        tokens = Embedding(vocab_size_tokens, embedding_vector_size, 
+                           input_length=max_text_length_tokens, weights=[embedding_matrix_words])(input_tokens)
         tokens = Conv1D(filters=32, kernel_size=3, padding='same')(tokens)
         tokens = Conv1D(filters=64, kernel_size=3, padding='same')(tokens)
         tokens = Activation("relu")(tokens)
@@ -126,7 +101,8 @@ def getModel(subtype = "words", embedding_vector_size = 300, droprate = 0.2, voc
         tokens = Model(inputs=input_tokens,outputs=tokens)
         # define-character based model
         input_char = Input(shape=(max_text_length_char,))
-        char = Embedding(vocab_size_char, embedding_vector_size, input_length=max_text_length_char)(input_char)
+        char = Embedding(vocab_size_char, embedding_vector_size, 
+                         input_length=max_text_length_char, weights=[embedding_matrix_char])(input_char)
         char = Conv1D(filters=32, kernel_size=3, padding='same')(char)
         char = Conv1D(filters=64, kernel_size=3, padding='same')(char)
         char = Activation("relu")(char)
@@ -182,11 +158,27 @@ def gridSearch(subtype="words"):
     record_test = 0
     # run grid-search
     for e in embedding_size:
+        # save np.load
+        np_load_old = np.load
+        # modify the default parameters of np.load
+        np.load = lambda *a,**k: np_load_old(*a, allow_pickle=True,**k)
+        if subtype == "words":
+            embedding_matrix_words = np.load("./data/glove/glove.6B."+str(e)+"d_word_emb.npy")
+            embedding_matrix_char = None
+        elif subtype == "char":
+            embedding_matrix_char = np.load("./data/glove/glove.6B."+str(e)+"d_char_emb.npy")
+            embedding_matrix_words = None
+        else:
+            embedding_matrix_words = np.load("./data/glove/glove.6B."+str(e)+"d_word_emb.npy")
+            embedding_matrix_char = np.load("./data/glove/glove.6B."+str(e)+"d_char_emb.npy")
+        np.load = np_load_old
+        # move into grid-search loop
         for d in droprate:
             for b in batch_size:
                 for l in learning_rate:
                     clear_session()
-                    model = getModel(subtype,embedding_vector_size=e,droprate=d)
+                    model = getModel(embedding_matrix_words,embedding_matrix_char,
+                                     subtype,embedding_vector_size=e,droprate=d)
                     callbacks = [EarlyStopping(monitor='val_acc', patience=5, restore_best_weights=True),
                                  ModelCheckpoint(filepath='./pickles/'+current_time+'/best_model_'
                                                  +str(counter)+'.h5', monitor='val_acc', save_best_only=True)]
@@ -272,10 +264,8 @@ if __name__ == "__main__":
 # comments/to-dos
 ##############################
 
-# TODO: find way of encoding glove word and flair character embeddings
-# provide 4 embedding dimension options, otherwise randomly initialize
-# add subtype to embedding matrix creation
-# fix up downloading of glove embeddings
+# TODO: read in embedding matrix for single run
 # add bidirectional elements for words and character lstms
+# consider adding batch normalization in the pipeline
 # deploy all code to google colab and provide links
 # modify all code to output precision and recall as well
