@@ -238,3 +238,11 @@ if __name__ == "__main__":
         singleRun(args.subtype)
     elif args.grid_search:
         gridSearch(args.subtype)
+        
+##############################
+# comments/to-dos
+##############################
+
+# TODO: look through RNN training loop to see if there could be memory leak, esp in handling best test accuracies
+# deploy all code to google colab and provide links
+# modify all code to output precision and recall as well, maybe can repeat multiple times for best model

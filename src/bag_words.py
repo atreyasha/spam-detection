@@ -44,7 +44,15 @@ def read_order(files):
 
 def tokenize(obj):
     store = []
-    lem = nltk.stem.wordnet.WordNetLemmatizer()
+    try:
+        lem = nltk.stem.wordnet.WordNetLemmatizer()
+    except LookupError:
+        nltk.download("wordnet")
+        lem = nltk.stem.wordnet.WordNetLemmatizer()
+    try:
+        nltk.corpus.stopwords.words('english')
+    except LookupError:
+        nltk.download("stopwords")
     for el in tqdm(obj):
         int_store = []
         res = nltk.pos_tag(text_to_word_sequence(el))

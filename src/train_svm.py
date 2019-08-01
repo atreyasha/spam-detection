@@ -53,7 +53,7 @@ def checkingTrainer(model,X_train,y_train,X_valid,y_valid,epochs,batch_size,pati
                 break
     return best_val, best_model
 
-def gridSearch(epochs=50,patience=5):
+def gridSearch(epochs=50,patience=5,kernels="linear"):
     # load labels
     y_train = np.load("./data/svm/y_train.npy")
     y_valid = np.load("./data/svm/y_valid.npy")
@@ -75,64 +75,66 @@ def gridSearch(epochs=50,patience=5):
     writer.writeheader()
     csvfile.flush()
     # define grid-search parameters
-    alpha = np.linspace(0.0001,0.001,20)
-    Batch_size = np.linspace(100,500,5,dtype=int)
-    gamma = np.linspace(0.01,1,20)
+    alpha = np.linspace(0.00001,0.0005,20)
+    Batch_size = np.linspace(50,300,5,dtype=int)
+    gamma = np.linspace(0.01,2,20)
     n_components = np.linspace(100,1000,4,dtype=int)
     # start loop for linear kernel
     counter = 0
     record_test = 0
-    for batch_size in Batch_size:
-        for a in alpha:
-            model = SGDClassifier(alpha=a,n_jobs=-1)
-            best_val, best_model = checkingTrainer(model,X_train,y_train,X_valid,y_valid,
-                                                   epochs,batch_size,patience)
-            best_train = accuracy_score(y_train,model.predict(X_train)) 
-            best_test = accuracy_score(y_test,model.predict(X_test))
-            # write to csv file in loop
-            writer.writerow({"model":str(counter), "kernel":"linear", "alpha":str(a),
-                             "batch_size":str(batch_size), "gamma":"None", "n_components":"None",
-                             "best_train":str(best_train), "best_val":str(best_val), 
-                             "best_test":str(best_test)})
-            csvfile.flush()
-            if best_test >= record_test:
-                record_test = best_test
-                with open("./pickles/"+current_time+"/best_model_"+str(counter)+".pickle", "wb") as f:
-                    pickle.dump(best_model,f,protocol=pickle.HIGHEST_PROTOCOL)
-                todel= [el for el in glob("./pickles/"+current_time+"/best_model*") if 'best_model_'+str(counter)+'.pickle' not in el]
-                if len(todel) > 0:
-                    for el in todel:
-                        os.remove(el)
-            counter += 1
-    # start loop for rbf kernel
-    for batch_size in Batch_size:
-        for a in alpha:
-            for g in gamma:
-                for n in n_components:
-                    feature_map_nystroem = Nystroem(gamma=g,n_components=n)
-                    X_train_mod = feature_map_nystroem.fit_transform(X_train)
-                    X_valid_mod = feature_map_nystroem.fit_transform(X_valid)
-                    X_test_mod = feature_map_nystroem.fit_transform(X_test)
-                    model = SGDClassifier(alpha=a,n_jobs=-1)
-                    best_val, best_model = checkingTrainer(model,X_train_mod,y_train,X_valid_mod,y_valid,
-                                                           epochs,batch_size,patience)
-                    best_train = accuracy_score(y_train,model.predict(X_train_mod))
-                    best_test = accuracy_score(y_test,model.predict(X_test_mod))
-                    # write to csv file in loop
-                    writer.writerow({"model":str(counter), "kernel":"rbf", "alpha":str(a),
-                                     "batch_size":str(batch_size), "gamma":str(g), "n_components":str(n),
-                                     "best_train":str(best_train), "best_val":str(best_val), 
-                                     "best_test":str(best_test)})
-                    csvfile.flush()
-                    if best_test >= record_test:
-                        record_test = best_test
-                        with open("./pickles/"+current_time+"/best_model_"+str(counter), "wb") as f:
-                            pickle.dump(best_model, f, protocol=pickle.HIGHEST_PROTOCOL)
-                        todel= [el for el in glob("./pickles/"+current_time+"/best_model*") if 'best_model_'+str(counter)+'.pickle' not in el]
-                        if len(todel) > 0:
-                            for el in todel:
-                                os.remove(el)
-                    counter += 1
+    if kernels == "linear" or kernels == "all":
+        for batch_size in Batch_size:
+            for a in alpha:
+                model = SGDClassifier(alpha=a,n_jobs=-1)
+                best_val, best_model = checkingTrainer(model,X_train,y_train,X_valid,y_valid,
+                                                       epochs,batch_size,patience)
+                best_train = accuracy_score(y_train,model.predict(X_train)) 
+                best_test = accuracy_score(y_test,model.predict(X_test))
+                # write to csv file in loop
+                writer.writerow({"model":str(counter), "kernel":"linear", "alpha":str(a),
+                                 "batch_size":str(batch_size), "gamma":"None", "n_components":"None",
+                                 "best_train":str(best_train), "best_val":str(best_val), 
+                                 "best_test":str(best_test)})
+                csvfile.flush()
+                if best_test >= record_test:
+                    record_test = best_test
+                    with open("./pickles/"+current_time+"/best_model_"+str(counter)+".pickle", "wb") as f:
+                        pickle.dump(best_model,f,protocol=pickle.HIGHEST_PROTOCOL)
+                    todel= [el for el in glob("./pickles/"+current_time+"/best_model*") if 'best_model_'+str(counter)+'.pickle' not in el]
+                    if len(todel) > 0:
+                        for el in todel:
+                            os.remove(el)
+                counter += 1
+    if kernels == "all":
+        # start loop for rbf kernel
+        for batch_size in Batch_size:
+            for a in alpha:
+                for g in gamma:
+                    for n in n_components:
+                        feature_map_nystroem = Nystroem(gamma=g,n_components=n)
+                        X_train_mod = feature_map_nystroem.fit_transform(X_train)
+                        X_valid_mod = feature_map_nystroem.fit_transform(X_valid)
+                        X_test_mod = feature_map_nystroem.fit_transform(X_test)
+                        model = SGDClassifier(alpha=a,n_jobs=-1)
+                        best_val, best_model = checkingTrainer(model,X_train_mod,y_train,X_valid_mod,y_valid,
+                                                               epochs,batch_size,patience)
+                        best_train = accuracy_score(y_train,model.predict(X_train_mod))
+                        best_test = accuracy_score(y_test,model.predict(X_test_mod))
+                        # write to csv file in loop
+                        writer.writerow({"model":str(counter), "kernel":"rbf", "alpha":str(a),
+                                         "batch_size":str(batch_size), "gamma":str(g), "n_components":str(n),
+                                         "best_train":str(best_train), "best_val":str(best_val), 
+                                         "best_test":str(best_test)})
+                        csvfile.flush()
+                        if best_test >= record_test:
+                            record_test = best_test
+                            with open("./pickles/"+current_time+"/best_model_"+str(counter), "wb") as f:
+                                pickle.dump(best_model, f, protocol=pickle.HIGHEST_PROTOCOL)
+                            todel= [el for el in glob("./pickles/"+current_time+"/best_model*") if 'best_model_'+str(counter)+'.pickle' not in el]
+                            if len(todel) > 0:
+                                for el in todel:
+                                    os.remove(el)
+                        counter += 1
     csvfile.close()
     
 ###############################
@@ -145,13 +147,7 @@ if __name__ == "__main__":
                         help="maximum number of epochs for training <default:50>")
     parser.add_argument("--patience", type=int, default=5,
                         help="patience for early stopping <default:5>")
+    parser.add_argument("--kernels", type=str, default="linear",
+                        help="which kernels to search over, either 'linear' or 'all' (linear and rbf) <default:'linear'>")
     args = parser.parse_args()
-    gridSearch(args.epochs,args.patience)
-
-##############################
-# comments/to-dos
-##############################
-
-# TODO: look through RNN training loop to see if there could be memory leak, esp in handling best test accuracies
-# deploy all code to google colab and provide links
-# modify all code to output precision and recall as well, maybe can repeat multiple times for best model
+    gridSearch(args.epochs,args.patience,args.kernels)
