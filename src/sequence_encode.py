@@ -62,20 +62,19 @@ def integerEncode(vocab_size=5000, padding_words=500, padding_chars=1000):
     np.save("./data/rnn/y_valid.npy", y_valid)
     np.save("./data/rnn/y_test.npy", y_test)
     # integer encode data from tokens perspective
-    unknown_token = vocab_size
     tokens_flat = [token for el in X_train for token in el]
     tokens_common = Counter(tokens_flat).most_common()
-    tokens_common = dict(tokens_common[:unknown_token-1])
+    tokens_common = dict(tokens_common[:vocab_size-1])
     for i, key in enumerate(tokens_common.keys()):
         tokens_common[key] = i+1
     # encode training set
-    X_train = pad_sequences([[tokens_common[el] if el in tokens_common.keys() else unknown_token 
+    X_train = pad_sequences([[tokens_common[el] if el in tokens_common.keys() else 0 
                                       for el in ls] for ls in X_train], maxlen=padding_words)
     # encode validation set
-    X_valid = pad_sequences([[tokens_common[el] if el in tokens_common.keys() else unknown_token 
+    X_valid = pad_sequences([[tokens_common[el] if el in tokens_common.keys() else 0 
                                       for el in ls] for ls in X_valid],maxlen=padding_words)
     # encode test set
-    X_test = pad_sequences([[tokens_common[el] if el in tokens_common.keys() else unknown_token 
+    X_test = pad_sequences([[tokens_common[el] if el in tokens_common.keys() else 0 
                                      for el in ls] for ls in X_test],maxlen=padding_words)
     # save all numpy arrays to file
     np.save("./data/rnn/words/X_train.npy", X_train)
@@ -96,15 +95,14 @@ def integerEncode(vocab_size=5000, padding_words=500, padding_chars=1000):
             tokens_common.pop(key,None)
     for i, key in enumerate(tokens_common):
         tokens_common[key] = i+1
-    unknown_token = np.max(list(tokens_common.values()))+1
     # encode training set
-    X_train = pad_sequences([[tokens_common[el.lower()] if el.lower() in tokens_common.keys() else unknown_token 
+    X_train = pad_sequences([[tokens_common[el.lower()] if el.lower() in tokens_common.keys() else 0 
                                       for el in ls] for ls in X_train], maxlen=padding_chars)
     # encode validation set
-    X_valid = pad_sequences([[tokens_common[el.lower()] if el.lower() in tokens_common.keys() else unknown_token 
+    X_valid = pad_sequences([[tokens_common[el.lower()] if el.lower() in tokens_common.keys() else 0 
                                       for el in ls] for ls in X_valid],maxlen=padding_chars)
     # encode test set
-    X_test = pad_sequences([[tokens_common[el.lower()] if el.lower() in tokens_common.keys() else unknown_token 
+    X_test = pad_sequences([[tokens_common[el.lower()] if el.lower() in tokens_common.keys() else 0 
                                      for el in ls] for ls in X_test],maxlen=padding_chars)
     # save all numpy arrays to file
     np.save("./data/rnn/char/X_train.npy", X_train)
