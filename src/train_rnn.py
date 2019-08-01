@@ -150,8 +150,7 @@ def gridSearch(subtype="words"):
     batch_size = [128,256]
     learning_rate = np.linspace(0.001,0.006,3)
     counter = 0
-    best = []
-    best_test = []
+    record_test = 0
     # run grid-search
     for e in embedding_size:
         for d in droprate:
@@ -176,9 +175,9 @@ def gridSearch(subtype="words"):
                         scores = model.evaluate([X_test[0],X_test[1]], y_test, verbose=1)
                         print("Accuracy: " + str(scores[1]*100) + "%")
                     max_index = np.argmax(history.history["val_acc"])
-                    best_test.append(scores[1])
-                    best.append([history.history["acc"][max_index],history.history["val_acc"][max_index],scores[1]])
-                    if np.argmax(best_test) == counter:
+                    best_test = scores[1]
+                    if best_test >= record_test:
+                        record_test = best_test
                         todel= [el for el in glob("./pickles/"+current_time+"/best_model*") if 'best_model_'+str(counter)+'.h5' not in el]
                         if len(todel) > 0:
                             for el in todel:
@@ -188,8 +187,9 @@ def gridSearch(subtype="words"):
                     # write to csv file in loop
                     writer.writerow({"model":str(counter), "embedding_size":str(e), "droprate":str(d),
                                      "batch_size":str(b), "learning_rate":str(l),
-                                     "best_train":str(best[counter][0]), "best_val":str(best[counter][1]), 
-                                     "best_test":str(best[counter][2])})
+                                     "best_train":str(history.history["acc"][max_index]),
+                                     "best_val":str(history.history["val_acc"][max_index]),
+                                     "best_test":str(best_test)})
                     csvfile.flush()
                     counter += 1
                     # clear memory
@@ -243,8 +243,7 @@ if __name__ == "__main__":
 # comments/to-dos
 ##############################
 
-# TODO: look through RNN training loop to see if there could be memory leak, esp in handling best test accuracies
-# find way of encoding glove word and flair character embeddings
+# TODO: find way of encoding glove word and flair character embeddings
 # add bidirectional elements for words and character lstms
 # deploy all code to google colab and provide links
 # modify all code to output precision and recall as well

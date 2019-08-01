@@ -1,5 +1,5 @@
+Keras==2.2.4
+numpy==1.16.4
 tqdm==4.32.1
 nltk==3.4.4
-numpy==1.16.4
-Keras==2.2.4
 scikit_learn==0.21.3

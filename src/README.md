@@ -54,7 +54,7 @@ $ python3 sequence_encode.py
 
 ### 2. Model training
 
-The following scripts/functions conduct grid-searches over various hyperparameters to train a SVM and LSTM-CNN.
+The following scripts/functions conduct grid-searches over various hyperparameters to train a SVM and CNN-LSTM.
 
 #### 2.1. Support Vector Machine (SVM)
 
@@ -68,8 +68,8 @@ optional arguments:
   -h, --help           show this help message and exit
   --epochs EPOCHS      maximum number of epochs for training <default:50>
   --patience PATIENCE  patience for early stopping <default:5>
-  --kernels KERNELS    which kernels to search over, either 'linear' or 'all'
-                       (linear and rbf) <default:'linear'>
+  --kernels KERNELS    which kernels to search over, either 'linear', 'rbf' or
+                       'all' <default:'linear'>
 ```
 
 Best models and log files for grid searches will be saved under the `./pickles` directory. An example of running the file is shown below:
@@ -78,9 +78,9 @@ Best models and log files for grid searches will be saved under the `./pickles` 
 $ python3 train_svm.py
 ```
 
-#### 2.2. LSTM-CNN
+#### 2.2. CNN-LSTM
 
-Executing `train_rnn.py` will conduct a grid-search to train and test a LSTM-CNN over a validation set. Further details can be found below:
+Executing `train_rnn.py` will conduct a grid-search to train and test a CNN-LSTM over a validation set. Further details can be found below:
 
 ```
 usage: train_rnn.py [-h] [--subtype SUBTYPE] [--grid-search] [--single-run]
