@@ -1,11 +1,5 @@
 ## Comparison of LSTM-CNN (sequential) vs. SVM (non-sequential) models for supervised spam classification
 
-### Table of Contents
-
-1. [Data preprocessing](#Data-preprocessing)
-2. [Model training](#Model-training)
-3. Model comparisons
-
 ### 1. Data preprocessing
 
 Before running the models, we would need to preprocess our text based data for model training.
@@ -20,7 +14,7 @@ usage: bag_words.py [-h] [--vocab-size VOCAB_SIZE]
 optional arguments:
   -h, --help            show this help message and exit
   --vocab-size VOCAB_SIZE
-                        size of vocabulary used in word vector embedding
+                        size of vocabulary used in bag-of-words encoding
                         <default:5000>
 ```
 

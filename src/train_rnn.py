@@ -244,5 +244,7 @@ if __name__ == "__main__":
 ##############################
 
 # TODO: look through RNN training loop to see if there could be memory leak, esp in handling best test accuracies
+# find way of encoding glove word and flair character embeddings
+# add bidirectional elements for words and character lstms
 # deploy all code to google colab and provide links
-# modify all code to output precision and recall as well, maybe can repeat multiple times for best model
+# modify all code to output precision and recall as well
