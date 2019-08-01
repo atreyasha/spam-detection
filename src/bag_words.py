@@ -44,22 +44,13 @@ def read_order(files):
 
 def tokenize(obj):
     store = []
-    try:
-        lem = nltk.stem.wordnet.WordNetLemmatizer()
-    except LookupError:
-        nltk.download("wordnet")
-        lem = nltk.stem.wordnet.WordNetLemmatizer()
-    try:
-        nltk.corpus.stopwords.words('english')
-    except LookupError:
-        nltk.download("stopwords")
+    nltk.download("wordnet")
+    nltk.download("stopwords")
+    nltk.download('averaged_perceptron_tagger')
+    lem = nltk.stem.wordnet.WordNetLemmatizer()
     for el in tqdm(obj):
         int_store = []
-        try:
-            res = nltk.pos_tag(text_to_word_sequence(el))
-        except LookupError:
-            nltk.download('averaged_perceptron_tagger')
-            res = nltk.pos_tag(text_to_word_sequence(el))
+        res = nltk.pos_tag(text_to_word_sequence(el))
         for tup in res:
             if tup[0].isalpha() and tup[0] not in nltk.corpus.stopwords.words('english'):
                 int_store.append(lem.lemmatize(tup[0], _get_wordnet_pos(tup[1])))
