@@ -25,6 +25,22 @@ def batchDispatcher(X,batch_size):
     no_samples = int(np.ceil(X.shape[0]/batch_size))
     return [np.random.randint(X.shape[0],size=batch_size) for _ in range(no_samples)]
 
+def loadData(normalize=True):
+    # load labels
+    y_train = np.load("./data/svm/y_train.npy")
+    y_valid = np.load("./data/svm/y_valid.npy")
+    y_test = np.load("./data/svm/y_test.npy")
+    # load feature data
+    X_train = np.load("./data/svm/words/X_train.npy")
+    X_valid = np.load("./data/svm/words/X_valid.npy")
+    X_test = np.load("./data/svm/words/X_test.npy")
+    if normalize == True:
+        # normalize X training data
+        X_train = X_train*(1/(np.sum(X_train, axis = 1)[:,None]))
+        X_valid = X_valid*(1/(np.sum(X_valid, axis = 1)[:,None]))
+        X_test = X_test*(1/(np.sum(X_test, axis = 1)[:,None]))
+    return X_train, y_train, X_valid, y_valid, X_test, y_test
+
 def checkingTrainer(model,X_train,y_train,X_valid,y_valid,epochs,batch_size,patience):
     patience_counter = 0
     for epoch in range(epochs):
@@ -54,18 +70,7 @@ def checkingTrainer(model,X_train,y_train,X_valid,y_valid,epochs,batch_size,pati
     return best_val, best_model
 
 def gridSearch(epochs=50,patience=5,kernels="linear"):
-    # load labels
-    y_train = np.load("./data/svm/y_train.npy")
-    y_valid = np.load("./data/svm/y_valid.npy")
-    y_test = np.load("./data/svm/y_test.npy")
-    # load feature data
-    X_train = np.load("./data/svm/words/X_train.npy")
-    X_valid = np.load("./data/svm/words/X_valid.npy")
-    X_test = np.load("./data/svm/words/X_test.npy")
-    # normalize X training data
-    X_train = X_train*(1/(np.sum(X_train, axis = 1)[:,None]))
-    X_valid = X_valid*(1/(np.sum(X_valid, axis = 1)[:,None]))
-    X_test = X_test*(1/(np.sum(X_test, axis = 1)[:,None]))
+    X_train, y_train, X_valid, y_valid, X_test, y_test = loadData()
     # write log file and csv
     current_time = getCurrentTime()+"_svm_"+kernels
     os.makedirs("pickles/"+current_time)
@@ -103,7 +108,7 @@ def gridSearch(epochs=50,patience=5,kernels="linear"):
                             os.remove(el)
                 counter += 1
     if kernels == "rbf" or kernels == "all":
-        alpha = np.linspace(0.00001,0.0005,5)
+        alpha = np.linspace(0.001,0.01,5)
         Batch_size = np.linspace(50,300,2,dtype=int)
         gamma = np.linspace(0.01,2,5)
         n_components = np.linspace(100,1000,2,dtype=int)
