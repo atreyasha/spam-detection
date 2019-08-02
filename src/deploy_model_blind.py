@@ -3,10 +3,10 @@
 
 import pickle
 import re
-import numpy as np
 import keras
 import argparse
 import pandas as pd
+import numpy as np
 from glob import glob
 from bag_words import tokenize, bagging  
 from sklearn.linear_model import SGDClassifier
@@ -61,7 +61,7 @@ def blindRNN(pickle_file,blind_data,text,y_blind,maxlen_words=500,maxlen_char=10
         out = model.predict([X_blind_words,X_blind_char])
     out = np.where(out >= 0.5, 1, 0)
     with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
-        f.write(classification_report(y_blind,out))
+        f.write(classification_report(y_blind,out,digits=4))
 
 #############################
 # pre-process for SVM
@@ -88,7 +88,7 @@ def blindSVM(pickle_file,text,y_blind):
         rbf_feature = RBFSampler(gamma=g,n_components=n)
         X_blind_words = rbf_feature.fit_transform(X_blind_words)
         with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
-            f.write(classification_report(y_blind,model.predict(X_blind_words)))
+            f.write(classification_report(y_blind,model.predict(X_blind_words),digits=4))
 
 ##############################
 # main command call
@@ -111,14 +111,3 @@ if __name__ == "__main__":
         blindRNN(args.pickle,blind_data,text,y_blind,args.padding_tokens,args.padding_char)
     elif "svm" in args.pickle:
         blindSVM(args.pickle,text,y_blind)
-    
-#############################
-# comments/to-dos
-#############################
-
-# TODO:
-# overfitting for RNN based on character and word sequences
-# it can handle spelling mistakes but fits on types of text very well
-# SVM's token capabilities can generalize on texts as long as some known words are present
-# sequences are important, but word content is more important for spam classification
-# effect of spelling mistakes is less important compared to presence of words
