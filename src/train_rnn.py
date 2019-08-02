@@ -63,11 +63,18 @@ def getModel(embedding_matrix_words,embedding_matrix_char,
     if subtype in ["words","char"]:
         model = Sequential()
         if subtype == "words":
-            model.add(Embedding(vocab_size_tokens, embedding_vector_size,
+            if embedding_matrix_words is not None:
+                model.add(Embedding(vocab_size_tokens, embedding_vector_size,
                                 input_length=max_text_length_tokens, weights=[embedding_matrix_words]))
+            else:
+                model.add(Embedding(vocab_size_tokens, embedding_vector_size,
+                                input_length=max_text_length_tokens))
         elif subtype == "char":
-            model.add(Embedding(vocab_size_char, embedding_vector_size, input_length=max_text_length_char,
+            if embedding_matrix_words is not None:
+                model.add(Embedding(vocab_size_char, embedding_vector_size, input_length=max_text_length_char,
                                 weights=[embedding_matrix_char]))
+            else:
+                model.add(Embedding(vocab_size_char, embedding_vector_size, input_length=max_text_length_char))
         model.add(Conv1D(filters=32, kernel_size=3, padding='same'))
         model.add(Conv1D(filters=64, kernel_size=3, padding='same'))
         model.add(Activation("relu"))
@@ -86,8 +93,12 @@ def getModel(embedding_matrix_words,embedding_matrix_char,
     elif subtype == "all":
         # define token-based model
         input_tokens = Input(shape=(max_text_length_tokens,))
-        tokens = Embedding(vocab_size_tokens, embedding_vector_size, 
+        if embedding_matrix_words is not None:
+            tokens = Embedding(vocab_size_tokens, embedding_vector_size, 
                            input_length=max_text_length_tokens, weights=[embedding_matrix_words])(input_tokens)
+        else:
+            tokens = Embedding(vocab_size_tokens, embedding_vector_size, 
+                           input_length=max_text_length_tokens)(input_tokens)
         tokens = Conv1D(filters=32, kernel_size=3, padding='same')(tokens)
         tokens = Conv1D(filters=64, kernel_size=3, padding='same')(tokens)
         tokens = Activation("relu")(tokens)
@@ -101,8 +112,12 @@ def getModel(embedding_matrix_words,embedding_matrix_char,
         tokens = Model(inputs=input_tokens,outputs=tokens)
         # define-character based model
         input_char = Input(shape=(max_text_length_char,))
-        char = Embedding(vocab_size_char, embedding_vector_size, 
+        if embedding_matrix_char is not None:
+            char = Embedding(vocab_size_char, embedding_vector_size, 
                          input_length=max_text_length_char, weights=[embedding_matrix_char])(input_char)
+        else: 
+            char = Embedding(vocab_size_char, embedding_vector_size, 
+                         input_length=max_text_length_char)(input_char)
         char = Conv1D(filters=32, kernel_size=3, padding='same')(char)
         char = Conv1D(filters=64, kernel_size=3, padding='same')(char)
         char = Activation("relu")(char)
@@ -122,9 +137,28 @@ def getModel(embedding_matrix_words,embedding_matrix_char,
         model = Model(inputs=[tokens.input, char.input], outputs=combined)
         return model
 
-def singleRun(subtype="words"):
+def singleRun(subtype="words",pre_trained_embeddings=True):
     X_train, X_valid, X_test, y_train, y_valid, y_test = load_data(subtype)
-    model = getModel(subtype)
+    if subtype == "words":
+        if pre_trained_embeddings:
+            embedding_matrix_words = np.load("./data/glove/glove.6B.300d_word_emb.npy")
+        else:
+            embedding_matrix_words = None
+        embedding_matrix_char = None
+    elif subtype == "char":
+        if pre_trained_embeddings:
+            embedding_matrix_char = np.load("./data/glove/glove.6B.300d_char_emb.npy")
+        else:
+            embedding_matrix_char = None
+        embedding_matrix_words = None
+    else:
+        if pre_trained_embeddings:
+            embedding_matrix_words = np.load("./data/glove/glove.6B.300d_word_emb.npy")
+            embedding_matrix_char = np.load("./data/glove/glove.6B.300d_char_emb.npy")
+        else:
+             embedding_matrix_words = None
+             embedding_matrix_char = None
+    model = getModel(embedding_matrix_words,embedding_matrix_char,subtype)
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['accuracy'])
     if subtype in ["words","char"]:
         model.fit(X_train, y_train, epochs=3, batch_size=256,
@@ -138,7 +172,7 @@ def singleRun(subtype="words"):
         print("Accuracy: " + str(scores[1]*100) + "%")
     return model
 
-def gridSearch(subtype="words"):
+def gridSearch(subtype="words",pre_trained_embeddings=True):
     # load data into memory
     X_train, X_valid, X_test, y_train, y_valid, y_test = load_data(subtype)
     # create log directory and info csv
@@ -163,14 +197,24 @@ def gridSearch(subtype="words"):
         # modify the default parameters of np.load
         np.load = lambda *a,**k: np_load_old(*a, allow_pickle=True,**k)
         if subtype == "words":
-            embedding_matrix_words = np.load("./data/glove/glove.6B."+str(e)+"d_word_emb.npy")
+            if pre_trained_embeddings:
+                embedding_matrix_words = np.load("./data/glove/glove.6B."+str(e)+"d_word_emb.npy")
+            else:
+                embedding_matrix_words = None
             embedding_matrix_char = None
         elif subtype == "char":
-            embedding_matrix_char = np.load("./data/glove/glove.6B."+str(e)+"d_char_emb.npy")
+            if pre_trained_embeddings:
+                embedding_matrix_char = np.load("./data/glove/glove.6B."+str(e)+"d_char_emb.npy")
+            else:
+                embedding_matrix_char = None
             embedding_matrix_words = None
         else:
-            embedding_matrix_words = np.load("./data/glove/glove.6B."+str(e)+"d_word_emb.npy")
-            embedding_matrix_char = np.load("./data/glove/glove.6B."+str(e)+"d_char_emb.npy")
+            if pre_trained_embeddings:
+                embedding_matrix_words = np.load("./data/glove/glove.6B."+str(e)+"d_word_emb.npy")
+                embedding_matrix_char = np.load("./data/glove/glove.6B."+str(e)+"d_char_emb.npy")
+            else:
+                 embedding_matrix_words = None
+                 embedding_matrix_char = None
         np.load = np_load_old
         # move into grid-search loop
         for d in droprate:
@@ -243,6 +287,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--subtype", type=str, default="words",
                         help="which model subtype to use; either 'words', 'char' or 'all' <default:'words'>")
+    parser.add_argument("--pre-trained-embeddings", default=False, action="store_true",
+                        help="option to use pre-trained word/character embeddings, disabled by default")
     parser.add_argument("--grid-search", default=True, action="store_true",
                         help="option to conduct grid-search, enabled by default")
     parser.add_argument("--single-run", default=False, action="store_true",
@@ -256,6 +302,6 @@ if __name__ == "__main__":
     if args.plot:
         plot_K_model(args.name,args.subtype)
     elif args.single_run:
-        singleRun(args.subtype)
+        singleRun(args.subtype,args.pre_trained_embeddings)
     elif args.grid_search:
-        gridSearch(args.subtype)
+        gridSearch(args.subtype,args.pre_trained_embeddings)

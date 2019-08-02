@@ -8,7 +8,7 @@ import argparse
 import pandas as pd
 import numpy as np
 from glob import glob
-from bag_words import tokenize, bagging  
+from bag_words import tokenize, bagging
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import classification_report
 from sklearn.kernel_approximation import RBFSampler
@@ -37,8 +37,7 @@ def readBlind():
     return text, blind_data, y_blind
 
 #############################
-# pre-process for RNN
-# testing on blind dataset
+# RNN on blind dataset
 #############################
 
 def blindRNN(pickle_file,blind_data,text,y_blind,maxlen_words=500,maxlen_char=1000):
@@ -64,8 +63,7 @@ def blindRNN(pickle_file,blind_data,text,y_blind,maxlen_words=500,maxlen_char=10
         f.write(classification_report(y_blind,out,digits=4))
 
 #############################
-# pre-process for SVM
-# testing on blind dataset
+# SVM on blind dataset
 #############################
 
 def blindSVM(pickle_file,text,y_blind):
@@ -102,12 +100,30 @@ if __name__ == "__main__":
                         help="maximum length of email padding for characters <default:1000>")
     requiredNamed = parser.add_argument_group('required named arguments')
     requiredNamed.add_argument('-p', '--pickle', type=str,
-                               help="pickle directory name for stored model", 
+                               help="pickle directory name for stored model, or input 'all' to run on all models", 
                                required=True)
     args = parser.parse_args()
     # execute main command
     text, blind_data, y_blind = readBlind()
-    if "rnn" in args.pickle:
-        blindRNN(args.pickle,blind_data,text,y_blind,args.padding_tokens,args.padding_char)
-    elif "svm" in args.pickle:
-        blindSVM(args.pickle,text,y_blind)
+    files = glob("./pickles/20*")
+    # run evaluations on blind dataset
+    if args.pickle != "all":
+        if "rnn" in args.pickle:
+            blindRNN(args.pickle,blind_data,text,y_blind,args.padding_tokens,args.padding_char)
+        elif "svm" in args.pickle:
+            blindSVM(args.pickle,text,y_blind)
+    else:
+        for file in files:
+            if "rnn" in file:
+                blindRNN(file,blind_data,text,y_blind,args.padding_tokens,args.padding_char)
+            elif "svm" in file:
+                blindSVM(file,text,y_blind)
+            
+##############################
+# comments/to-dos
+##############################
+
+# TODO: add charts and more structured information on github
+# make more structured data download systems
+# add option to use/ignore pre-trained embeddings
+# add embedding matrix option into single run for rnn
