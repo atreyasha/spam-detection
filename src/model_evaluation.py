@@ -70,25 +70,44 @@ def blindSVM(pickle_file,text,y_blind):
     with open(full_name,"rb") as f:
         model = pickle.load(f)
     y_blind[np.where(y_blind==0)[0]] = -1
-    if "linear" in pickle_file:
-        with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
-            f.write(classification_report(y_blind,model.predict(X_blind_words)))
-    elif "rbf" in pickle_file:
+    if "rbf" in pickle_file:
         number = int(re.sub(".pickle","",re.sub(r".*best_model_","",full_name)))
         df = pd.read_csv(glob("./pickles/"+pickle_file+"/log*")[0])
         g = float(df[df["model"] == number]["gamma"])
         n = int(df[df["model"] == number]["n_components"])
         rbf_feature = RBFSampler(gamma=g,n_components=n)
         X_blind_words = rbf_feature.fit_transform(X_blind_words)
-        with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
-            f.write(classification_report(y_blind,model.predict(X_blind_words),digits=4))
+    with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
+        f.write(classification_report(y_blind,model.predict(X_blind_words),digits=4))
 
 #############################
 # save prob. maps for models
 #############################
 
-pass
-
+def runRNN(pickle_file,X_test_rnn,maxlen_words=500,maxlen_char=1000):
+    model = keras.models.load_model(glob("./pickles/"+pickle_file+"/best*")[0])
+    if "words" in pickle_file:
+        out = model.predict(X_test_rnn[0])
+    elif "char" in pickle_file:
+        out = model.predict(X_test_rnn[1])
+    elif "all" in pickle_file:
+        out = model.predict([X_test_rnn[0],X_test_rnn[1]])
+    np.save("./pickles/"+pickle_file+"/prob_map_test.npy", out)
+    
+def runSVM(pickle_file,X_test_svm):
+    full_name = glob("./pickles/"+pickle_file+"/best*")[0]
+    with open(full_name,"rb") as f:
+        model = pickle.load(f)
+    if "rbf" in pickle_file:
+        number = int(re.sub(".pickle","",re.sub(r".*best_model_","",full_name)))
+        df = pd.read_csv(glob("./pickles/"+pickle_file+"/log*")[0])
+        g = float(df[df["model"] == number]["gamma"])
+        n = int(df[df["model"] == number]["n_components"])
+        rbf_feature = RBFSampler(gamma=g,n_components=n)
+        X_test_svm = rbf_feature.fit_transform(X_test_svm)
+    out = model.decision_function(X_test_svm)
+    np.save("./pickles/"+pickle_file+"/prob_map_test.npy", out)
+    
 ##############################
 # main command call
 ##############################
@@ -106,26 +125,23 @@ if __name__ == "__main__":
     args = parser.parse_args()
     # execute main command
     text, blind_data, y_blind = readBlind()
+    _,_, X_test_rnn,_,_,_ = load_data("all")
+    _,_, _, _,X_test_svm,_ = loadData()
     files = glob("./pickles/20*")
     # run evaluations based on pickle input
     if args.pickle != "all":
         if "rnn" in args.pickle:
+            runRNN(args.pickle,X_test_rnn,args.padding_tokens,args.padding_char)
             blindRNN(args.pickle,blind_data,text,y_blind,args.padding_tokens,args.padding_char)
         elif "svm" in args.pickle:
+            runSVM(args.pickle,X_test_svm)
             blindSVM(args.pickle,text,y_blind)
     else:
         for file in files:
+            filename = os.path.basename(file)
             if "rnn" in file:
-                blindRNN(os.path.basename(file),blind_data,text,y_blind,args.padding_tokens,args.padding_char)
+                runRNN(filename,X_test_rnn,args.padding_tokens,args.padding_char)
+                blindRNN(filename,blind_data,text,y_blind,args.padding_tokens,args.padding_char)
             elif "svm" in file:
-                blindSVM(os.path.basename(file),text,y_blind)
-
-##############################
-# comments/to-dos
-##############################
-
-# TODO: make all models output probability maps and then perform thresholds
-# output probability maps for blind dataset too
-# save classification reports for all datasets later after threshold analysis
-# add charts and more structured information on github
-# make more structured data download systems
+                runSVM(filename,X_test_svm)
+                blindSVM(filename,text,y_blind)
