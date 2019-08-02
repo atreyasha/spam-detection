@@ -259,13 +259,3 @@ if __name__ == "__main__":
         singleRun(args.subtype)
     elif args.grid_search:
         gridSearch(args.subtype)
-        
-##############################
-# comments/to-dos
-##############################
-
-# TODO: read in embedding matrix for single run
-# add bidirectional elements for words and character lstms
-# consider adding batch normalization in the pipeline
-# deploy all code to google colab and provide links
-# modify all code to output precision and recall as well

@@ -3,6 +3,7 @@
 ### Architecture
 * hypertune runs to find best models, set baselines with individual runs
 * bidirectional element to further improve performance
+* perhaps add attention element to find key phrases
 
 ### Word/character/byte embeddings
 * extrapolate by using FLAIR pre-trained character/byte embeddings for initialization to overcome unknown words
