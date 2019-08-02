@@ -3,6 +3,7 @@
 
 import pickle
 import re
+import os
 import keras
 import argparse
 import pandas as pd
@@ -115,9 +116,9 @@ if __name__ == "__main__":
     else:
         for file in files:
             if "rnn" in file:
-                blindRNN(file,blind_data,text,y_blind,args.padding_tokens,args.padding_char)
+                blindRNN(os.path.basename(file),blind_data,text,y_blind,args.padding_tokens,args.padding_char)
             elif "svm" in file:
-                blindSVM(file,text,y_blind)
+                blindSVM(os.path.basename(file),text,y_blind)
             
 ##############################
 # comments/to-dos
