@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import pickle
 import re
 import os
 import keras
+import pickle
 import argparse
 import pandas as pd
 import numpy as np
 from glob import glob
+from train_rnn import load_data
+from train_svm import loadData
 from bag_words import tokenize, bagging
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import classification_report
@@ -17,7 +19,7 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import text_to_word_sequence
 
 #############################
-# get blind text
+# blind data processing
 #############################
 
 def readBlind():
@@ -36,10 +38,6 @@ def readBlind():
     text = [" ".join(el) for el in text]
     blind_data = [text_to_word_sequence(el) for el in text]
     return text, blind_data, y_blind
-
-#############################
-# RNN on blind dataset
-#############################
 
 def blindRNN(pickle_file,blind_data,text,y_blind,maxlen_words=500,maxlen_char=1000):
     if "words" in pickle_file or "all" in pickle_file:
@@ -63,10 +61,6 @@ def blindRNN(pickle_file,blind_data,text,y_blind,maxlen_words=500,maxlen_char=10
     with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
         f.write(classification_report(y_blind,out,digits=4))
 
-#############################
-# SVM on blind dataset
-#############################
-
 def blindSVM(pickle_file,text,y_blind):
     cleaned = tokenize(text)
     with open("./data/svm/words/integer_index_tokens.pickle","rb") as f:
@@ -89,6 +83,12 @@ def blindSVM(pickle_file,text,y_blind):
         with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
             f.write(classification_report(y_blind,model.predict(X_blind_words),digits=4))
 
+#############################
+# save prob. maps for models
+#############################
+
+pass
+
 ##############################
 # main command call
 ##############################
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     # execute main command
     text, blind_data, y_blind = readBlind()
     files = glob("./pickles/20*")
-    # run evaluations on blind dataset
+    # run evaluations based on pickle input
     if args.pickle != "all":
         if "rnn" in args.pickle:
             blindRNN(args.pickle,blind_data,text,y_blind,args.padding_tokens,args.padding_char)
@@ -119,12 +119,13 @@ if __name__ == "__main__":
                 blindRNN(os.path.basename(file),blind_data,text,y_blind,args.padding_tokens,args.padding_char)
             elif "svm" in file:
                 blindSVM(os.path.basename(file),text,y_blind)
-            
+
 ##############################
 # comments/to-dos
 ##############################
 
-# TODO: add charts and more structured information on github
+# TODO: make all models output probability maps and then perform thresholds
+# output probability maps for blind dataset too
+# save classification reports for all datasets later after threshold analysis
+# add charts and more structured information on github
 # make more structured data download systems
-# add option to use/ignore pre-trained embeddings
-# add embedding matrix option into single run for rnn

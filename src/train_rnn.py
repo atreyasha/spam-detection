@@ -176,10 +176,13 @@ def gridSearch(subtype="words",pre_trained_embeddings=True):
     # load data into memory
     X_train, X_valid, X_test, y_train, y_valid, y_test = load_data(subtype)
     # create log directory and info csv
-    current_time = getCurrentTime()+"_rnn_"+subtype
+    if pre_trained_embeddings:
+        current_time = getCurrentTime()+"_rnn_"+subtype+"_glove_embed"
+    else:
+        current_time = getCurrentTime()+"_rnn_"+subtype+"_random_embed"
     os.makedirs("pickles/"+current_time)
     csvfile = open('pickles/'+ current_time + '/' + 'log.csv', 'w')
-    fieldnames = ["model", "embedding_size", "droprate", "batch_size", "learning_rate", "best_train", "best_val", "best_test"]
+    fieldnames = ["model", "pre_trained_embeddings", "embedding_size", "droprate", "batch_size", "learning_rate", "best_train", "best_val", "best_test"]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
     csvfile.flush()
@@ -250,7 +253,8 @@ def gridSearch(subtype="words",pre_trained_embeddings=True):
                     else:
                         os.remove('./pickles/'+current_time+'/best_model_'+str(counter)+'.h5')
                     # write to csv file in loop
-                    writer.writerow({"model":str(counter), "embedding_size":str(e), "droprate":str(d),
+                    writer.writerow({"model":str(counter), "pre_trained_embeddings":str(pre_trained_embeddings),
+                                     "embedding_size":str(e), "droprate":str(d),
                                      "batch_size":str(b), "learning_rate":str(l),
                                      "best_train":str(history.history["acc"][max_index]),
                                      "best_val":str(history.history["val_acc"][max_index]),
