@@ -6,6 +6,7 @@ library(optparse)
 library(ggplot2)
 library(latex2exp)
 library(extrafont)
+library(optparse)
 font_install('fontcm')
 loadfonts()
 
@@ -73,8 +74,47 @@ combinedPlot <- function(){
   embed_fonts("../img/combined.pdf", outfile="../img/combined.pdf")
 }
 
+svmWordPlot <- function(){
+  files <- list.files("./pickles",recursive=TRUE,full.names=TRUE)
+  files <- grep("top|bottom",grep("linear",files,value=TRUE),value=TRUE)
+  dir <- dirname(files[1])
+  top_words <- read.csv(grep("top.*csv$",files,value=TRUE),stringsAsFactors=FALSE)
+  bottom_words <- read.csv(grep("bottom.*csv$",files,value=TRUE),stringsAsFactors=FALSE)
+  top_words$name <- "top"
+  bottom_words$name <- "bottom"
+  # make plot for top words
+  pdf(paste0(dir,"/top_words.pdf"), width=12, height=8)
+  g <- ggplot(data=top_words, aes(reorder(word,coefficient,sum),coefficient)) + geom_col(fill = "red",colour="black",
+                                                                                         size=0.34,alpha = 0.8) +
+    theme_bw() + theme(text=element_text(size=11),legend.position="none", plot.title=element_text(hjust = 0.5)) + 
+    xlab("Word") + ylab(TeX("Absolute weight |$\\beta$|")) +
+    ggtitle(TeX("Ten-Highest |$\\beta$| coefficients"))
+  print(g)
+  dev.off()
+  embed_fonts(paste0(dir,"/top_words.pdf"), outfile=paste0(dir,"/top_words.pdf"))
+  # make plot for bottom words
+  pdf(paste0(dir,"/bottom_words.pdf"), width=12, height=8)
+  g <- ggplot(data=bottom_words, aes(reorder(word,coefficient,sum),coefficient)) + geom_col(fill="blue",colour="black",
+                                                                                           size=0.34,alpha = 0.7) +
+    theme_bw() + theme(text = element_text(size=12),legend.position="none",plot.title=element_text(hjust = 0.5)) + 
+    xlab("Word") + ylab(TeX("Absolute weight |$\\beta$|")) +
+    ggtitle(TeX("Ten-Lowest |$\\beta$| coefficients"))
+  print(g)
+  dev.off()
+  embed_fonts(paste0(dir,"/bottom_words.pdf"), outfile=paste0(dir,"/bottom_words.pdf"))
+}
+
 ###########################
 # main command call
 ###########################
 
-combinedPlot()
+option_list = list(
+  make_option(c("-t", "--type"), type="character", default="combined", 
+              help="which process to execute, either 'combined' or 'svm'", metavar="character"))
+opt_parser = OptionParser(option_list=option_list)
+opt = parse_args(opt_parser)
+if(opt$type == "combined"){
+  combinedPlot()
+} else if(opt$type == "svm"){
+  svmWordPlot()
+}
