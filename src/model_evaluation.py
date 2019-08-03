@@ -4,11 +4,11 @@
 import re
 import os
 import keras
-import deepcopy
 import pickle
 import argparse
 import pandas as pd
 import numpy as np
+from copy import deepcopy
 from glob import glob
 from train_rnn import load_data
 from train_svm import loadData
