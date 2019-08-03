@@ -6,8 +6,7 @@ library(optparse)
 library(ggplot2)
 library(latex2exp)
 library(extrafont)
-# only required for initial run
-# font_install('fontcm')
+font_install('fontcm')
 loadfonts()
 
 ###########################
@@ -25,24 +24,27 @@ combinedPlot <- function(){
     store <- read.csv(x,stringsAsFactors=FALSE)
     store["name"] <- names(mapping)[which(mapping==gsub("\\/.*","",gsub("(.*)(rnn|svm.*)","\\2",x)))]
     store <- store[c(4,1:3)]
+    store <- store[which(store["recall"]!=1),]
+    store <- store[which(store[,2]!=0),]
     return(store)
   })
   optimal <- lapply(files, function(x) {
     store <- read.csv(x,stringsAsFactors=FALSE)
     store["name"] <- names(mapping)[which(mapping==gsub("\\/.*","",gsub("(.*)(rnn|svm.*)","\\2",x)))]
     store <- store[c(4,1:3)]
-    if(sum(which(store["precision"]>=0.998)) == 0){
-      store <- store[which(store["precision"]==max(store["precision"])),]
-    } else {
-      store <- store[which(store["precision"]>=0.998),]
+    store <- store[which(store["recall"]!=1),]
+    store <- store[which(store["recall"]!=0),]
+    if(sum(which(store["recall"]>=0.998)) == 0){
       store <- store[which(store["recall"]==max(store["recall"])),]
+    } else {
+      store <- store[which(store["recall"]>=0.998),]
+      store <- store[which(store["precision"]==max(store["precision"])),]
     }
     store$optimal <- "optimal"
     return(store)
   })
   store <- do.call("rbind",store)
   optimal <- do.call("rbind",optimal)
-  store <- store[-which(store[,2]==0),]
   store$name <- factor(store$name,levels = names(mapping)[c(1,3,5,2,4,6)])
   optimal$name <- factor(optimal$name,levels = names(mapping)[c(1,3,5,2,4,6)])
   # prepare ggplot for combined object
@@ -50,7 +52,7 @@ combinedPlot <- function(){
   g <- ggplot(data=store) + 
     geom_point(aes(x=recall, y=precision, colour=threshold),size=1.5) +
     geom_point(data = optimal, aes(x=recall, y=precision, fill=optimal),size=2, colour="red", alpha = 0.8) +
-    geom_abline(slope = 0, intercept = 0.998, linetype = "dashed", size = 0.25, colour = "red") +
+    geom_vline(xintercept = 0.998, linetype = "dashed", size = 0.25, colour = "red",alpha=0.6) +
     theme_bw() +
     ylim(c(min(store["precision"]),1.00)) + xlim(c(min(store["recall"]),1.00)) +
     xlab("\nRecall") + ylab("Precision\n") + 
