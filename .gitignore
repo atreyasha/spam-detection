@@ -1,2 +1,4 @@
 # ignore pycache files
 *.pyc
+*.Rhistory
+*.Rda
