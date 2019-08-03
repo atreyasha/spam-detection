@@ -4,6 +4,7 @@
 import re
 import os
 import keras
+import deepcopy
 import pickle
 import argparse
 import pandas as pd
@@ -62,6 +63,7 @@ def blindRNN(pickle_file,blind_data,text,y_blind,maxlen_words=500,maxlen_char=10
         f.write(classification_report(y_blind,out,digits=4))
 
 def blindSVM(pickle_file,text,y_blind):
+    y_svm_blind = deepcopy(y_blind)
     cleaned = tokenize(text)
     with open("./data/svm/words/integer_index_tokens.pickle","rb") as f:
         word_dict = pickle.load(f)
@@ -69,7 +71,7 @@ def blindSVM(pickle_file,text,y_blind):
     full_name = glob("./pickles/"+pickle_file+"/best*")[0]
     with open(full_name,"rb") as f:
         model = pickle.load(f)
-    y_blind[np.where(y_blind==0)[0]] = -1
+    y_svm_blind[np.where(y_svm_blind==0)[0]] = -1
     if "rbf" in pickle_file:
         number = int(re.sub(".pickle","",re.sub(r".*best_model_","",full_name)))
         df = pd.read_csv(glob("./pickles/"+pickle_file+"/log*")[0])
@@ -78,7 +80,7 @@ def blindSVM(pickle_file,text,y_blind):
         rbf_feature = RBFSampler(gamma=g,n_components=n)
         X_blind_words = rbf_feature.fit_transform(X_blind_words)
     with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
-        f.write(classification_report(y_blind,model.predict(X_blind_words),digits=4))
+        f.write(classification_report(y_svm_blind,model.predict(X_blind_words),digits=4))
 
 #############################
 # save prob. maps for models
