@@ -86,7 +86,7 @@ def blindSVM(pickle_file,text,y_blind):
 # save prob. maps for models
 #############################
 
-def runRNN(pickle_file,X_test_rnn,maxlen_words=500,maxlen_char=1000):
+def runRNN(pickle_file,X_test_rnn):
     model = keras.models.load_model(glob("./pickles/"+pickle_file+"/best*")[0])
     if "words" in pickle_file:
         out = model.predict(X_test_rnn[0])
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     # run evaluations based on pickle input
     if args.pickle != "all":
         if "rnn" in args.pickle:
-            runRNN(args.pickle,X_test_rnn,args.padding_tokens,args.padding_char)
+            runRNN(args.pickle,X_test_rnn)
             blindRNN(args.pickle,blind_data,text,y_blind,args.padding_tokens,args.padding_char)
         elif "svm" in args.pickle:
             runSVM(args.pickle,X_test_svm)
@@ -142,7 +142,7 @@ if __name__ == "__main__":
         for file in files:
             filename = os.path.basename(file)
             if "rnn" in file:
-                runRNN(filename,X_test_rnn,args.padding_tokens,args.padding_char)
+                runRNN(filename,X_test_rnn)
                 blindRNN(filename,blind_data,text,y_blind,args.padding_tokens,args.padding_char)
             elif "svm" in file:
                 runSVM(filename,X_test_svm)

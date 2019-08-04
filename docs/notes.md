@@ -5,6 +5,7 @@
 * compare with bag-of-words on SVM vs. sequential RNN, most likely SVM will exceed
 * attain blind-dataset to check robustness of RNNs vs SVMs, use same pre-processing as per enron dataset
 * tendency to flag largely misspelled emails, might result in RNN being more robust on blind dataset
+* add option to print classification report for train and valid datasets during evaluation period
 
 ### Assumptions
 * no name or email address of sender, classify only based on content of email
