@@ -131,19 +131,3 @@ if __name__ == "__main__":
                 if "linear" in file:
                     os.system("Rscript plot_models.R --type svm")
         os.system("Rscript plot_models.R --type combined")
-
-##############################
-# comments/to-dos
-##############################
-
-## schema:
-# plot threshold values on PR curve with orientation on non-spam class to select best model, to answer qn. 1, plot PR curves with F1-contour lines
-# create classification reports for best thresholds, to answer qn. 2 (combined plot)
-# 1st table with basic F1 performance, then charts with thresholds, then combined confusion matrices
-# then table with adjust thresholds, precision on non-spam, recall on spam and overall F1 performance
-# lastly table with blind dataset and F1 performances to find most robust models
-# make nice tables, think of how to present uniform classifier
-
-## extra:
-# add charts and more structured information on github, with separate docs on function implementation
-# make more structured data download systems, with dialogue oriented approach
