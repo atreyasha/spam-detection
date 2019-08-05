@@ -273,14 +273,14 @@ def plot_K_model(name,subtype="words"):
     # useful to convert from sequential to functional for plotting model
     if subtype in ["words","char"]:
         clear_session()
-        model = getModel(subtype)
+        model = getModel(None,None,subtype)
         input_layer = layers.Input(batch_shape=model.layers[0].input_shape)
         prev_layer = input_layer
         for layer in model.layers:
             prev_layer = layer(prev_layer)
         funcmodel = models.Model([input_layer], [prev_layer])
     elif subtype == "all":
-        funcmodel = getModel(subtype)
+        funcmodel = getModel(None,None,subtype)
     plot_model(funcmodel, to_file='../img/'+name+'.png', show_shapes=True)
     
 ###############################

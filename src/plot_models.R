@@ -49,7 +49,7 @@ combinedPlot <- function(){
   store$name <- factor(store$name,levels = names(mapping)[c(1,3,5,2,4,6)])
   optimal$name <- factor(optimal$name,levels = names(mapping)[c(1,3,5,2,4,6)])
   # prepare ggplot for combined object
-  pdf("../img/combined.pdf", width=12, height=8)
+  pdf("../img/combined.pdf", width=12, height=7)
   g <- ggplot(data=store) + 
     geom_point(aes(x=recall, y=precision, colour=threshold),size=1.5) +
     geom_point(data = optimal, aes(x=recall, y=precision, fill=optimal),size=2, colour="red", alpha = 0.8) +
@@ -61,7 +61,7 @@ combinedPlot <- function(){
           legend.text=element_text(size=10),
           legend.title=element_text(size=10),
           legend.key = element_rect(colour = "lightgray", fill = "white"),
-          strip.text = element_text(size = 10)) +
+          strip.text = element_text(size = 10,face="bold")) +
     scale_colour_continuous(type = "viridis", guide = "colourbar") +
     scale_fill_discrete(name="",
                         breaks=c("optimal"),
@@ -76,32 +76,36 @@ combinedPlot <- function(){
 
 svmWordPlot <- function(){
   files <- list.files("./pickles",recursive=TRUE,full.names=TRUE)
-  files <- grep("top|bottom",grep("linear",files,value=TRUE),value=TRUE)
+  files <- grep("ham|spam",grep("linear",files,value=TRUE),value=TRUE)
   dir <- dirname(files[1])
-  top_words <- read.csv(grep("top.*csv$",files,value=TRUE),stringsAsFactors=FALSE)
-  bottom_words <- read.csv(grep("bottom.*csv$",files,value=TRUE),stringsAsFactors=FALSE)
-  top_words$name <- "top"
-  bottom_words$name <- "bottom"
+  ham_words <- read.csv(grep("spam.*csv$",files,value=TRUE),stringsAsFactors=FALSE)
+  spam_words <- read.csv(grep("ham.*csv$",files,value=TRUE),stringsAsFactors=FALSE)
+  ham_words$name <- "bottom"
+  spam_words$name <- "top"
   # make plot for top words
-  pdf(paste0(dir,"/top_words.pdf"), width=12, height=8)
-  g <- ggplot(data=top_words, aes(reorder(word,coefficient,sum),coefficient)) + geom_col(fill = "red",colour="black",
+  pdf(paste0(dir,"/spam_words.pdf"), width=12, height=8)
+  g <- ggplot(data=spam_words, aes(reorder(word,coefficient,sum),coefficient)) + geom_col(fill = "red",colour="black",
                                                                                          size=0.34,alpha = 0.8) +
-    theme_bw() + theme(text=element_text(size=11),legend.position="none", plot.title=element_text(hjust = 0.5)) + 
-    xlab("Word") + ylab(TeX("Absolute weight |$\\beta$|")) +
-    ggtitle(TeX("Ten-Highest |$\\beta$| coefficients"))
+    theme_bw() + theme(text=element_text(size=16,family="CM Roman"),legend.position="none", plot.title=element_text(hjust = 0.5),
+                       axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+                       axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) + 
+    xlab("Word Feature") + ylab(TeX("Absolute weight |$\\theta$|")) +
+    ggtitle(TeX("Ranked spam |$\\theta$| coefficients"))
   print(g)
   dev.off()
-  embed_fonts(paste0(dir,"/top_words.pdf"), outfile=paste0(dir,"/top_words.pdf"))
+  embed_fonts(paste0(dir,"/spam_words.pdf"), outfile=paste0(dir,"/spam_words.pdf"))
   # make plot for bottom words
-  pdf(paste0(dir,"/bottom_words.pdf"), width=12, height=8)
-  g <- ggplot(data=bottom_words, aes(reorder(word,coefficient,sum),coefficient)) + geom_col(fill="blue",colour="black",
-                                                                                           size=0.34,alpha = 0.7) +
-    theme_bw() + theme(text = element_text(size=12),legend.position="none",plot.title=element_text(hjust = 0.5)) + 
-    xlab("Word") + ylab(TeX("Absolute weight |$\\beta$|")) +
-    ggtitle(TeX("Ten-Lowest |$\\beta$| coefficients"))
+  pdf(paste0(dir,"/ham_words.pdf"), width=12, height=8)
+  g <- ggplot(data=ham_words, aes(reorder(word,coefficient,sum),coefficient)) + geom_col(fill = "blue",colour="black",
+                                                                                         size=0.34,alpha = 0.8) +
+    theme_bw() + theme(text=element_text(size=16,family="CM Roman"),legend.position="none", plot.title=element_text(hjust = 0.5),
+                       axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+                       axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0))) + 
+    xlab("Word Feature") + ylab(TeX("Absolute weight |$\\theta$|")) +
+    ggtitle(TeX("Ranked ham |$\\theta$| coefficients"))
   print(g)
   dev.off()
-  embed_fonts(paste0(dir,"/bottom_words.pdf"), outfile=paste0(dir,"/bottom_words.pdf"))
+  embed_fonts(paste0(dir,"/ham_words.pdf"), outfile=paste0(dir,"/ham_words.pdf"))
 }
 
 ###########################

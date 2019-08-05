@@ -80,21 +80,23 @@ def importanceSVM(pickle_file):
     with open(full_name,"rb") as f:
         model = pickle.load(f)
     word_dict = {v:k for k,v in word_dict.items()}
-    words_top = np.argsort(np.abs(model.coef_[0]))[-10:]
-    words_bottom = np.argsort(np.abs(model.coef_[0]))[:10]
-    x_top = [word_dict[el] for el in words_top]
-    y_top = [np.abs(model.coef_[0][el]) for el in words_top]    
-    x_bottom = [word_dict[el] for el in words_bottom]
-    y_bottom = [np.abs(model.coef_[0][el]) for el in words_bottom]
-    with open("./pickles/"+pickle_file+"/top_words.csv", "w", newline="") as f:
+    pos_ind = np.where(model.coef_[0] > 0)[0]
+    neg_ind = np.where(model.coef_[0] < 0)[0]
+    spam_top = np.abs(model.coef_[0][pos_ind][np.argsort(model.coef_[0][pos_ind])][-10:])
+    ham_top = np.abs(model.coef_[0][neg_ind][np.argsort(model.coef_[0][neg_ind])][:10])
+    pos_ind = pos_ind[np.argsort(model.coef_[0][pos_ind])[-10:]]
+    neg_ind = neg_ind[np.argsort(model.coef_[0][neg_ind])[:10]]
+    spam_top_words = [word_dict[el] for el in pos_ind]
+    ham_top_words = [word_dict[el] for el in neg_ind]
+    with open("./pickles/"+pickle_file+"/spam_top_words.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(i for i in ["word","coefficient"])
-        writer.writerows(zip(x_top,y_top))
-    with open("./pickles/"+pickle_file+"/bottom_words.csv", "w", newline="") as f:
+        writer.writerows(zip(ham_top_words,ham_top))
+    with open("./pickles/"+pickle_file+"/ham_top_words.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(i for i in ["word","coefficient"])
-        writer.writerows(zip(x_bottom,y_bottom))
-
+        writer.writerows(zip(spam_top_words,spam_top))
+    
 ##############################
 # main command call
 ##############################
