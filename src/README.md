@@ -1,113 +1,29 @@
-## Comparison of SVM (non-sequential) vs. CNN-LSTM (sequential) models for supervised spam classification
+## Comparison of SVM (non-sequential) vs. CNN-LSTM (sequential) models for supervised spam classification <a href=\"https://colab.research.google.com/github/AtreyaSh/spam_detection/blob/master/enron_spam.ipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>
 
-### 1. Data preprocessing
+### 1. Overview
 
-Before running the models, we would need to preprocess our text based data for model training.
+In this repository, we will compare a supervised Support Vector Machine (SVM) non-sequential model against a CNN-LSTM sequential model to provide some insight into the effectivitiy and robustness of sequentialand non-sequential models in supervised spam classification.
 
-#### 1.1. Bag-of-words encoding for SVM
+The SVM will classify the emails using a bag-of-words representation, while the CNN-LSTM will be tested using word and/or character vectors, and in addition also with the possibility of pre-trained GloVe word and character embeddings. Finally, both sets of models will be compared with relevant evaluation metrics on a test and blind dataset (SMS spam).
 
-To preprocess data for our non-sequential model, we define a helper function in `bag_words.py`. This function reads in emails data and conducts the following pre-processing procedures: `tokenizing -> POS-tagging -> removing stop words -> lemmatizing`. This creates a clean set of words for our bag-of-words approach.
+### 2. Data acquisition
 
-```
-usage: bag_words.py [-h] [--vocab-size VOCAB_SIZE]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --vocab-size VOCAB_SIZE
-                        size of vocabulary used in bag-of-words encoding
-                        <default:5000>
-```
-
-Running this function will encode the enron-spam dataset in a bag-of-words format. This representation of encodings will be saved in the `./data/svm` directory. An example of running this function is show below:
+After cloning this repository, we would need to initialize it with all relevant data; which include the [enron-spam](http://www2.aueb.gr/users/ion/data/enron-spam/) database, [GloVe](https://nlp.stanford.edu/projects/glove/) word embeddings and [SMS-spam](https://archive.ics.uci.edu/ml/datasets/SMS+Spam+Collection) dataset. For this, a helper dialogue-based script `data.sh` has been created. To run it, execute the following and follow the corresponding prompts:
 
 ```shell
-$ python3 bag_words.py
+$ ./data.sh
 ```
 
-#### 1.2. Sequence encoding for CNN-LSTM
+### 3. Data pre-processing
 
-To preprocess data for our sequential model, we define a helper function in `sequence_encode.py`. This process tokenizes the words and additionally maps them to sequential characters. Next, a word/character to integer mapping is created and the sequences are integer-encoded as per the mapping. Lastly, the sequences are padded to the provided maximum padding length, which can then be fed in to embedding layers in Keras.
+Before training and testing our models, we would need to pre-process our data. Please refer to this [readme](/src/docs/pre-processing.md) for more information on data pre-processing.
 
-```
-usage: sequence_encode.py [-h] [--vocab-size VOCAB_SIZE]
-                         [--padding-tokens PADDING_TOKENS]
-                         [--padding-char PADDING_CHAR]
+### 4. Model training
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --vocab-size VOCAB_SIZE
-                        size of vocabulary used in word vector embedding
-                        <default:5000>
-  --padding-tokens PADDING_TOKENS
-                        maximum length of email padding for tokens
-                        <default:500>
-  --padding-char PADDING_CHAR
-                        maximum length of email padding for characters
-                        <default:1000>
-```
+To train our models, we developed scripts that will optimize models and choose the most appropriate ones through a grid-search. Please refer to this [readme](/src/docs/models.md) for more information on our models and their training procedures.
 
-Running this function will encode the enron-spam dataset as integer-based tokens and characters. The two sets of encodings will be saved in the `./data/rnn` directory. An example of running this function is show below:
+### 5. Model evaluation
 
-```shell
-$ python3 sequence_encode.py
-```
+To evaluate our models, we developed scripts that output various metrics such as precision, recall, F-1 score and the ROC-AUC. Furthermore, plots of the models and their corresponding evaluation metrics will be made (with R; please install relevant libraries; see [here](/src/plot_models.R)). Please refer to this [readme](/src/docs/model-evaluation.md) for more information on our evaluation procedures.
 
-In addition, it would be required to run `embedding_matrix_gen.py" in order to produce word and approximate character embeddings from glove word embeddings. To do this, please run:
-
-```shell
-$ python3 embedding_matrix_gen.py
-```
-
-### 2. Model training
-
-The following scripts/functions conduct grid-searches over various hyperparameters to train a SVM and CNN-LSTM.
-
-#### 2.1. Support Vector Machine (SVM)
-
-Executing `train_svm.py` will conduct a grid-search to train a SVM using scikit-learn's SGDClassififer using mini-batch Stochastic Gradient Descent (MB-SGD). Early-stopping based on validation dataset performance is included. The SGDClassifier's default kernel is the linear kernel, however an option can be passed to use the RBF kernel with a kernel approximation. Further details can be found below:
-
-```
-usage: train_svm.py [-h] [--epochs EPOCHS] [--patience PATIENCE]
-                    [--kernels KERNELS]
-
-optional arguments:
-  -h, --help           show this help message and exit
-  --epochs EPOCHS      maximum number of epochs for training <default:50>
-  --patience PATIENCE  patience for early stopping <default:5>
-  --kernels KERNELS    which kernels to search over, either 'linear', 'rbf' or
-                       'all' <default:'linear'>
-```
-
-Best models and log files for grid searches will be saved under the `./pickles` directory. An example of running the file is shown below:
-
-```
-$ python3 train_svm.py
-```
-
-#### 2.2. CNN-LSTM
-
-Executing `train_rnn.py` will conduct a grid-search to train and test a CNN-LSTM over a validation set. Further details can be found below:
-
-```
-usage: train_rnn.py [-h] [--subtype SUBTYPE] [--grid-search] [--single-run]
-                    [--plot] [--name NAME]
-
-optional arguments:
-  -h, --help         show this help message and exit
-  --subtype SUBTYPE  which model subtype to use; either 'words', 'char' or
-                     'all' <default:'words'>
-  --grid-search      option to conduct grid-search, enabled by default
-  --single-run       option to conduct single run based on default
-                     hyperparameters, disabled by default
-  --plot             option for plotting keras model, disabled by default
-  --name NAME        if --plot option is chosen, this provides name of the
-                     model image <default:'model'>
-```
-
-Best models and log files for grid searches will be saved under the `./pickles` directory. An example of running the file is shown below:
-
-```
-$ python3 train_rnn.py
-```
-
-Note: Further development underway :snail:
+Finally, for a complete overview of the results/evaluation of this repository, please check our pdf [presentation](/docs/main.pdf) for results and (hopefully nice) visualizations.
