@@ -1,3 +1,4 @@
+ROC: 0.7578473551688973
               precision    recall  f1-score   support
 
            0     0.9409    0.1846    0.3086      4827

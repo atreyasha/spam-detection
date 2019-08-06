@@ -63,8 +63,8 @@ combinedPlot <- function(){
           legend.title=element_text(size=10),
           legend.key = element_rect(colour = "lightgray", fill = "white"),
           strip.text = element_text(size = 10,face="bold")) +
-    #scale_colour_continuous(type = "viridis", guide = "colourbar") +
-    scale_colour_gradientn(colours = terrain.colors(20)) +
+    scale_colour_continuous(type = "viridis", guide = "colourbar") +
+    # scale_colour_gradientn(colours = terrain.colors(20)) +
     #scale_colour_viridis_c() +
     scale_fill_discrete(name="",
                         breaks=c("optimal"),
