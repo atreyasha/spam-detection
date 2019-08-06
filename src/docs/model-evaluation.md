@@ -64,4 +64,6 @@ $ python3 model_visualization.py -p all
 
 A sample output of the combined chart for all models can be seen below:
 
-<img src="/img/combined.png" width="500">
+<p align="center">
+<img src="/img/combined.png" width="800">
+</p>
