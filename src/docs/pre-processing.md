@@ -30,7 +30,7 @@ $ python3 bag_words.py
 
 #### 2. Sequence encoding for CNN-LSTM
 
-To preprocess data for our sequential model, we define a helper function in `sequence_encode.py`. This process tokenizes the words and additionally maps them to sequential characters. Next, a word/character to integer mapping is created and the sequences are integer-encoded as per the mapping. Lastly, the sequences are padded to the provided maximum padding length, which can then be fed in to embedding layers in Keras.
+To preprocess data for our sequential model, we define a helper function in `sequence_encode.py`. This process tokenizes the words and, when desired, also maps them to sequential characters. Next, a word/character to integer mapping is created and the sequences are integer-encoded as per the mapping. Lastly, the sequences are padded to the provided maximum padding length, which can then be fed in to embedding layers in Keras.
 
 ```
 usage: sequence_encode.py [-h] [--vocab-size VOCAB_SIZE]
