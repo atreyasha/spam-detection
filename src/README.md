@@ -4,7 +4,7 @@
 
 In this repository, we will compare a Support Vector Machine (SVM) non-sequential model against a CNN-LSTM sequential model to provide some insight into the effectivitiy and robustness of sequential and non-sequential models in supervised spam classification.
 
-The SVM will classify the emails using a bag-of-words representation, while the CNN-LSTM will be tested using word and/or character vectors, and in addition also with the possibility of pre-trained GloVe word and character embeddings. Finally, both sets of models will be compared with relevant evaluation metrics on a test and blind dataset (SMS spam).
+The SVM classifies emails using a bag-of-words representation, while the CNN-LSTM classifies emails using word and/or character vectors, and in addition with the possibility of using pre-trained GloVe word and character embeddings. Finally, both sets of models will be compared with relevant evaluation metrics on a test and blind dataset (SMS spam).
 
 ### 2. Data acquisition
 
