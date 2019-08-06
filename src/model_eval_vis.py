@@ -8,7 +8,9 @@ import warnings
 import argparse
 import numpy as np
 from glob import glob
+from model_raw_values import readBlind 
 from sklearn.metrics import precision_recall_fscore_support, classification_report, roc_auc_score
+from sklearn.metrics import roc_curve
 
 ##############################
 # define key functions
@@ -26,9 +28,19 @@ def optimalThreshold(pr_list):
         return filtered[np.argmax(filtered[:,1])][0]
 
 def thresholdRNN(pickle_file):
+    # pipeline for blind data
+    _,_,y_blind = readBlind()
+    probs = np.load(glob("./pickles/"+pickle_file+"/prob_map_blind.npy")[0])
+    roc = roc_auc_score(y_blind,probs)
+    out = np.where(probs >= 0.5, 1, 0)
+    with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
+        f.write("ROC: "+str(roc)+"\n")
+        f.write(classification_report(y_blind,out,digits=4))
+    res = roc_curve(y_blind,probs)
+    np.save("./pickles/"+pickle_file+"/roc_blind.npy",res)
+    # pipeline for test data
     y_test = np.load("./data/rnn/y_test.npy")
-    # main processing
-    probs = np.load(glob("./pickles/"+pickle_file+"/prob*")[0])
+    probs = np.load(glob("./pickles/"+pickle_file+"/prob_map_test.npy")[0])
     thresholds = np.linspace(0.00001,1,50)
     pr_list = []
     for value in thresholds:
@@ -49,10 +61,23 @@ def thresholdRNN(pickle_file):
     with open("./pickles/"+pickle_file+"/classification_report_test_optimal.txt", "w") as f:
         f.write("Optimal threshold: "+str(optimal)+"\n")
         f.write(classification_report(y_test,out,digits=4))
+    res = roc_curve(y_test,probs)
+    np.save("./pickles/"+pickle_file+"/roc_test.npy",res)
 
 def thresholdSVM(pickle_file):
+    # pipeline for blind data
+    _,_,y_blind = readBlind()
+    y_blind[np.where(y_blind==0)[0]] = -1
+    probs = np.load(glob("./pickles/"+pickle_file+"/prob_map_blind.npy")[0])
+    roc = roc_auc_score(y_blind,probs)
+    out = np.where(probs >= 0, 1, -1)
+    with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
+        f.write("ROC: "+str(roc)+"\n")
+        f.write(classification_report(y_blind,out,digits=4))
+    res = roc_curve(y_blind,probs)
+    np.save("./pickles/"+pickle_file+"/roc_blind.npy",res)
+    # pipeline for test data
     y_test = np.load("./data/svm/y_test.npy")
-    # main processing
     probs = np.load(glob("./pickles/"+pickle_file+"/prob*")[0])
     mean = np.mean(probs)
     std = np.std(probs)
@@ -76,6 +101,8 @@ def thresholdSVM(pickle_file):
     with open("./pickles/"+pickle_file+"/classification_report_test_optimal.txt", "w") as f:
         f.write("Optimal threshold: "+str(optimal)+"\n")
         f.write(classification_report(y_test,out,digits=4))
+    res = roc_curve(y_test,probs)
+    np.save("./pickles/"+pickle_file+"/roc_test.npy",res)
         
 def importanceSVM(pickle_file):
     with open("./data/svm/words/integer_index_tokens.pickle","rb") as f:
@@ -100,17 +127,6 @@ def importanceSVM(pickle_file):
         writer = csv.writer(f)
         writer.writerow(i for i in ["word","coefficient"])
         writer.writerows(zip(spam_top_words,spam_top))
-    
-# roc = roc_auc_score(y_blind,out)
-# out = np.where(out >= 0.5, 1, 0)
-# with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
-#     f.write("ROC: "+str(roc)+"\n")
-#     f.write(classification_report(y_blind,out,digits=4))    
-
-# roc = roc_auc_score(y_svm_blind,out)
-# with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
-#     f.write("ROC: "+str(roc)+"\n")
-#     f.write(classification_report(y_svm_blind,model.predict(X_blind_words),digits=4))
 
 ##############################
 # main command call
@@ -150,3 +166,4 @@ if __name__ == "__main__":
                     importanceSVM(filename)
                     os.system("Rscript plot_models.R --type svm")
         os.system("Rscript plot_models.R --type combined")
+        os.system("Rscript plot_models.R --type combined_roc")

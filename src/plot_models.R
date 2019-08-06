@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*- 
 
 # import dependencies
-library(optparse)
+library(RcppCNPy)
+library(data.table)
 library(ggplot2)
 library(latex2exp)
 library(extrafont)
+library(ggsci)
 library(optparse)
 font_install('fontcm')
 loadfonts()
@@ -13,6 +15,48 @@ loadfonts()
 ###########################
 # method for combined plot
 ###########################
+
+combinedPlotROC <- function(){
+  # make mapping for nice names
+  mapping <- c("CNN-LSTM (Words)"="rnn_words_random_embed","CNN-LSTM (Words+Characters)"="rnn_all_random_embed",
+               "CNN-LSTM (Words+GloVe)"="rnn_words_glove_embed","CNN-LSTM (Words+Characters+GloVe)"="rnn_all_glove_embed",
+               "SVM (Linear Kernel)"="svm_linear","SVM (RBF Kernel Approximation)"="svm_rbf")
+  # read in all files and merge into single dataframe
+  for(str in c("test","blind")){
+    files <- list.files("./pickles",pattern=paste0("roc_",str,".npy"),recursive=TRUE,full.names=TRUE)
+    store <- lapply(files, function(x) {
+      store <- transpose(as.data.frame(npyLoad(x)))
+      names(store) <- c("fpr","tpr","threshold")
+      store["name"] <- names(mapping)[which(mapping==gsub("\\/.*","",gsub("(.*)(rnn|svm.*)","\\2",x)))]
+      store <- store[c(4,1:3)]
+      # store <- store[seq(1, nrow(store), 100),]
+      return(store)
+    })
+    store <- do.call("rbind",store)
+    store$name <- factor(store$name,levels = names(mapping)[c(5,6,1,3,2,4)])
+    # prepare ggplot for combined object
+    pdf(paste0("../img/roc_",str,".pdf"), width=12, height=7)
+    g <- ggplot(data=store) + 
+      geom_step(aes(x=fpr,y=tpr,color=name),size=0.7) +
+      geom_abline(intercept = 0, slope = 1, color = "black", linetype = "dashed") +
+      theme_bw() +
+      xlab("\nFalse Positive Rate") + ylab("True Positive Rate\n") +
+      theme(text = element_text(size=13, family="CM Roman"),
+            legend.text=element_text(size=10),
+            legend.title=element_text(size=10,face="bold"),
+            legend.key = element_rect(colour = "lightgray", fill = "white"),
+            strip.text = element_text(size = 10,face="bold"),
+            plot.title= element_text(size = 14, hjust = 0.5, face="bold"),
+            legend.position = c(0.84,0.2),
+            legend.background = element_rect(fill="transparent")) +
+      scale_color_ucscgb(name = "Model") +
+      ggtitle(paste0("ROC ",tools::toTitleCase(str)," Dataset"))
+    # print object
+    print(g)
+    dev.off()
+    embed_fonts(paste0("../img/roc_",str,".pdf"), outfile=paste0("../img/roc_",str,".pdf"))
+  }
+}
 
 combinedPlot <- function(){
   # make mapping for nice names
@@ -124,4 +168,6 @@ if(opt$type == "combined"){
   combinedPlot()
 } else if(opt$type == "svm"){
   svmWordPlot()
+} else if(opt$type == "combined_roc"){
+  combinedPlotROC()
 }
