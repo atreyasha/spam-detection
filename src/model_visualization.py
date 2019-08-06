@@ -8,7 +8,7 @@ import warnings
 import argparse
 import numpy as np
 from glob import glob
-from sklearn.metrics import precision_recall_fscore_support, classification_report
+from sklearn.metrics import precision_recall_fscore_support, classification_report, roc_auc_score
 
 ##############################
 # define key functions
@@ -29,7 +29,7 @@ def thresholdRNN(pickle_file):
     y_test = np.load("./data/rnn/y_test.npy")
     # main processing
     probs = np.load(glob("./pickles/"+pickle_file+"/prob*")[0])
-    thresholds = np.linspace(0,1,19)
+    thresholds = np.linspace(0.00001,1,50)
     pr_list = []
     for value in thresholds:
         out = np.where(probs >= value, 1, 0)
@@ -40,8 +40,10 @@ def thresholdRNN(pickle_file):
         writer.writerow(i for i in ["threshold","precision","recall"])
         writer.writerows(pr_list)
     optimal = optimalThreshold(pr_list)
+    roc = roc_auc_score(y_test,probs)
     out = np.where(probs >= 0.5, 1, 0)
     with open("./pickles/"+pickle_file+"/classification_report_test.txt", "w") as f:
+        f.write("ROC: "+str(roc)+"\n")
         f.write(classification_report(y_test,out,digits=4))
     out = np.where(probs >= optimal, 1, 0)
     with open("./pickles/"+pickle_file+"/classification_report_test_optimal.txt", "w") as f:
@@ -54,7 +56,7 @@ def thresholdSVM(pickle_file):
     probs = np.load(glob("./pickles/"+pickle_file+"/prob*")[0])
     mean = np.mean(probs)
     std = np.std(probs)
-    thresholds = np.linspace(mean-std,mean+std,19)
+    thresholds = np.linspace(mean-std,mean+std,50)
     pr_list = []
     for value in thresholds:
         out = np.where(probs >= value, 1, -1)
@@ -65,8 +67,10 @@ def thresholdSVM(pickle_file):
         writer.writerow(i for i in ["threshold","precision","recall"])
         writer.writerows(pr_list)
     optimal = optimalThreshold(pr_list)
+    roc = roc_auc_score(y_test,probs)
     out = np.where(probs >= 0, 1, -1)
     with open("./pickles/"+pickle_file+"/classification_report_test.txt", "w") as f:
+        f.write("ROC: "+str(roc)+"\n")
         f.write(classification_report(y_test,out,digits=4))
     out = np.where(probs >= optimal, 1, -1)
     with open("./pickles/"+pickle_file+"/classification_report_test_optimal.txt", "w") as f:
@@ -122,6 +126,7 @@ if __name__ == "__main__":
             thresholdSVM(args.pickle)
             warnings.warn("combined plots only possible with '-p all' option")
             if "linear" in args.pickle:
+                importanceSVM(args.pickle)
                 os.system("Rscript plot_models.R --type svm")
     else:
         for file in files:
@@ -131,5 +136,6 @@ if __name__ == "__main__":
             elif "svm" in file:
                 thresholdSVM(filename)
                 if "linear" in file:
+                    importanceSVM(filename)
                     os.system("Rscript plot_models.R --type svm")
         os.system("Rscript plot_models.R --type combined")
