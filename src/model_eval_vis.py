@@ -101,6 +101,17 @@ def importanceSVM(pickle_file):
         writer.writerow(i for i in ["word","coefficient"])
         writer.writerows(zip(spam_top_words,spam_top))
     
+# roc = roc_auc_score(y_blind,out)
+# out = np.where(out >= 0.5, 1, 0)
+# with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
+#     f.write("ROC: "+str(roc)+"\n")
+#     f.write(classification_report(y_blind,out,digits=4))    
+
+# roc = roc_auc_score(y_svm_blind,out)
+# with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
+#     f.write("ROC: "+str(roc)+"\n")
+#     f.write(classification_report(y_svm_blind,model.predict(X_blind_words),digits=4))
+
 ##############################
 # main command call
 ##############################

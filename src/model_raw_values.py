@@ -14,7 +14,6 @@ from train_rnn import load_data
 from train_svm import loadData
 from bag_words import tokenize, bagging
 from sklearn.linear_model import SGDClassifier
-from sklearn.metrics import classification_report,roc_auc_score
 from sklearn.kernel_approximation import RBFSampler
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import text_to_word_sequence
@@ -58,11 +57,8 @@ def blindRNN(pickle_file,blind_data,text,y_blind,maxlen_words=500,maxlen_char=10
         out = model.predict(X_blind_char)
     elif "all" in pickle_file:
         out = model.predict([X_blind_words,X_blind_char])
-    roc = roc_auc_score(y_blind,out)
-    out = np.where(out >= 0.5, 1, 0)
-    with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
-        f.write("ROC: "+str(roc)+"\n")
-        f.write(classification_report(y_blind,out,digits=4))
+    np.save("./pickles/"+pickle_file+"/prob_map_blind.npy", out)
+
 
 def blindSVM(pickle_file,text,y_blind):
     y_svm_blind = deepcopy(y_blind)
@@ -82,10 +78,8 @@ def blindSVM(pickle_file,text,y_blind):
         rbf_feature = RBFSampler(gamma=g,n_components=n)
         X_blind_words = rbf_feature.fit_transform(X_blind_words)
     out = model.decision_function(X_blind_words)
-    roc = roc_auc_score(y_svm_blind,out)
-    with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
-        f.write("ROC: "+str(roc)+"\n")
-        f.write(classification_report(y_svm_blind,model.predict(X_blind_words),digits=4))
+    np.save("./pickles/"+pickle_file+"/prob_map_blind.npy", out)
+
 
 #############################
 # save prob. maps for models
