@@ -4,7 +4,7 @@ After pre-processing our data, we can then train/optimize our models with grid-s
 
 #### 1. Support Vector Machine (SVM)
 
-Executing `train_svm.py` will conduct a grid-search to train a SVM using scikit-learn's SGDClassififer using mini-batch Stochastic Gradient Descent (MB-SGD). Early-stopping based on validation dataset performance is included. The SGDClassifier's default kernel is the linear kernel, however an option can be passed to use the RBF kernel with a kernel approximation (RBFSampler). Further details can be found below:
+Executing `train_svm.py` will conduct a grid-search to train a SVM using scikit-learn's SGDClassifier using mini-batch Stochastic Gradient Descent (MB-SGD). Early-stopping based on validation dataset performance is included. The SGDClassifier's default kernel is the linear kernel, however an option can be passed to use the RBF kernel with a kernel approximation (RBFSampler). Further details can be found below:
 
 ```
 usage: train_svm.py [-h] [--epochs EPOCHS] [--patience PATIENCE]
@@ -36,7 +36,7 @@ An advantage of a character-based approach is that it mitigates the unknown toke
 
 Finally, all three approaches can have the word/character embeddings randomly initialized or setup with the GloVe embeddings.
 
-Executing `train_rnn.py` will conduct a grid-search to train and test a CNN-LSTM over a validation set. Further details can be found below:
+Executing `train_rnn.py` will conduct a grid-search to train and test a CNN-LSTM over a validation/test set. Further details can be found below:
 
 ```
 usage: train_rnn.py [-h] [--subtype SUBTYPE] [--pre-trained-embeddings]

@@ -24,6 +24,8 @@ To train our models, we developed scripts that will optimize models and choose t
 
 ### 5. Model evaluation
 
-To evaluate our models, we developed scripts that output various metrics such as precision, recall, F-1 score and the ROC-AUC. Furthermore, plots of the models and their corresponding evaluation metrics will be made (with R; please install relevant libraries; see [here](/src/plot_models.R)). Please refer to this [readme](/src/docs/model-evaluation.md) for more information on our evaluation procedures.
+To evaluate our models, we developed scripts that output various metrics such as precision, recall, F-1 score and the ROC-AUC. Furthermore, plots of the models and their corresponding evaluation metrics will be made (please install relevant R libraries; see [here](/src/plot_models.R)). Please refer to this [readme](/src/docs/model-evaluation.md) for more information on our evaluation procedures.
+
+### 6. Summary
 
 Finally, for a complete overview of the results/evaluation of this repository, please check our pdf [presentation](/docs/main.pdf) for results and (hopefully nice) visualizations.
