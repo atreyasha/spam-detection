@@ -4,7 +4,7 @@ After performing grid-searches on the models, we would need to evaluate our best
 
 #### 1. Model probabilities and decision functions
 
-`model-evaluation.py` produces model probabilities and decision functions on the test and blind dataset. It also computes classification reports and ROC-AUC scores on the blind dataset.
+`model_evaluation.py` produces model probabilities and decision functions on the test and blind dataset. It also computes classification reports and ROC-AUC scores on the blind dataset.
 
 ```
 usage: model_evaluation.py [-h] [--padding-tokens PADDING_TOKENS]
@@ -35,7 +35,7 @@ $ python3 model_evaluation.py -p all
 
 After running the script above, we can then visualize some of our results. `model_visualization.py` performs optimal threshold analysis and provides the best threshold to maximize recall on ham emails while still preserving precision. If this optimization cannot be met, then it attempts to find the next best threshold.
 
-The script also produces classification reports and ROC-AUC scores on the test dataset based on various thresholds. In terms of visualization, this script produces charts for words-based relative importance analysis from the SVM and precision-recall curves for all models based on varying thresholds.
+The script also produces classification reports and ROC-AUC scores on the test dataset based on various thresholds. In terms of visualization, this script produces charts for words-based relative importance analysis from the SVM and precision-recall curves for all models based on varying thresholds. Note that this script calls `R` to plot some of the charts.
 
 ```
 usage: model_visualization.py [-h] [--padding-tokens PADDING_TOKENS]
