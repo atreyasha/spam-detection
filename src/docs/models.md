@@ -38,7 +38,7 @@ An advantage of a character-based approach is that it mitigates the unknown toke
 <img src="/img/model_combined.png" height="700">
 </p>
 
-Finally, all three approaches can have the word/character embeddings randomly initialized or setup with the GloVe embeddings.
+Finally, all three approaches can have the word/character embeddings randomly initialized or setup with the GloVe embeddings. Additionally, all three models are compiled differently depending on whether a GPU is present or not. It is highly recommended to train the CNN-LSTM with a GPU to minimize training runtime.
 
 Executing `train_rnn.py` will conduct a grid-search to train and test a CNN-LSTM over a validation/test set. Further details can be found below:
 
