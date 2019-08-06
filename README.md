@@ -10,7 +10,7 @@ To initialize this repository, it is recommended to enable a pre-commit hook whi
 $ ./init.sh
 ```
 
-Further information on data pre-processing, the models and results/evaluations can be found in the `/src` directory and the corresponding [readme](/src/README.md)
+Further information on data pre-processing, the models and results/evaluations can be found in the `/src` directory and the corresponding [readme](/src/README.md).
 
 ## Citation
 
