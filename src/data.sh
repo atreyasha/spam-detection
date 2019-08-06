@@ -11,7 +11,7 @@ fi
 read -rep "download and deploy glove(6B) data? (y/n): " ans
 if [ $ans == "y" ]; then
 	cd ./data/glove && wget http://nlp.stanford.edu/data/glove.6B.zip && unzip glove.6B.zip && cd ../..
-fi1
+fi
 
 # download blind sms spam dataset
 read -rep "download and deploy SMS spam blind data? (y/n): " ans
