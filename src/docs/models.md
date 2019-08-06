@@ -28,11 +28,15 @@ $ python3 train_svm.py
 
 In the CNN-LSTM set of models, we provide three different approaches. The first two approaches work by using either purely word or character encodings and embeddings. These can be visualized through the keras model below:
 
-<img src="/img/model.png" width="500">
+<p align="center">
+<img src="/img/model.png" height="700">
+</p>
 
 An advantage of a character-based approach is that it mitigates the unknown token issue; which could add to model robustness. However, character sequences lose semantic meaning of written text, so it might be viable to combine both versions. For this, we propose another model where character and word sequences are both used in classification. This is visualized below:
 
-<img src="/img/model_combined.png" width="500">
+<p align="center">
+<img src="/img/model_combined.png" height="700">
+</p>
 
 Finally, all three approaches can have the word/character embeddings randomly initialized or setup with the GloVe embeddings.
 
