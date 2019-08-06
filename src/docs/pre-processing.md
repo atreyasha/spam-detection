@@ -1,10 +1,16 @@
-### 1. Data preprocessing
+### Data preprocessing
 
 Before running the models, we would need to preprocess our text based data for model training.
 
-#### 1.1. Bag-of-words encoding for SVM
+#### 1. Bag-of-words encoding for SVM
 
-To preprocess data for our non-sequential model, we define a helper function in `bag_words.py`. This function reads in emails data and conducts the following pre-processing procedures: `tokenizing -> POS-tagging -> removing stop words -> lemmatizing`. This creates a clean set of words for our bag-of-words approach.
+To preprocess data for our non-sequential model, we define a helper function in `bag_words.py`. This function reads in emails data and conducts the following pre-processing procedures:
+
+```
+tokenizing -> POS-tagging -> removing stop words -> lemmatizing with pos-tags
+```
+
+This creates a clean set of words for our bag-of-words approach. We fill the bag-of-words matrix with word frequencies and later normalize the rows to get the bag-of-words in a probability representation.
 
 ```
 usage: bag_words.py [-h] [--vocab-size VOCAB_SIZE]
@@ -22,7 +28,7 @@ Running this function will encode the enron-spam dataset in a bag-of-words forma
 $ python3 bag_words.py
 ```
 
-#### 1.2. Sequence encoding for CNN-LSTM
+#### 2. Sequence encoding for CNN-LSTM
 
 To preprocess data for our sequential model, we define a helper function in `sequence_encode.py`. This process tokenizes the words and additionally maps them to sequential characters. Next, a word/character to integer mapping is created and the sequences are integer-encoded as per the mapping. Lastly, the sequences are padded to the provided maximum padding length, which can then be fed in to embedding layers in Keras.
 
@@ -50,10 +56,10 @@ Running this function will encode the enron-spam dataset as integer-based tokens
 $ python3 sequence_encode.py
 ```
 
-In addition, it would be required to run `embedding_matrix_gen.py" in order to produce word and approximate character embeddings from glove word embeddings. To do this, please run:
+#### 3. GloVe embedded matrix generation
+
+In order to test/use the GloVe word and character embeddings, we would need to match the GloVe words to our own vocabulary. `embedding_matrix_gen.py" automatically does this for us and also approximates GloVe character embeddings using a methodology from Max Woolf's github repository (https://github.com/minimaxir/char-embeddings). To create the embedding matrices, run the following:
 
 ```shell
 $ python3 embedding_matrix_gen.py
 ```
-
-
