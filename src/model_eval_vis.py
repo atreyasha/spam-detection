@@ -41,7 +41,7 @@ def thresholdRNN(pickle_file):
     # pipeline for test data
     y_test = np.load("./data/rnn/y_test.npy")
     probs = np.load(glob("./pickles/"+pickle_file+"/prob_map_test.npy")[0])
-    thresholds = np.linspace(0.00001,1,50)
+    thresholds = np.linspace(0,1,4000)
     pr_list = []
     for value in thresholds:
         out = np.where(probs >= value, 1, 0)
@@ -81,7 +81,7 @@ def thresholdSVM(pickle_file):
     probs = np.load(glob("./pickles/"+pickle_file+"/prob*")[0])
     mean = np.mean(probs)
     std = np.std(probs)
-    thresholds = np.linspace(mean-std,mean+std,50)
+    thresholds = np.linspace(mean-std,mean+std,4000)
     pr_list = []
     for value in thresholds:
         out = np.where(probs >= value, 1, -1)

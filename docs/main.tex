@@ -316,20 +316,20 @@
 			\def\arraystretch{1.5}
 			\begin{tabular}{|c|c|c|c|} \hline
 				Classifier & Threshold & Recall $\lbrack$Spam$\rbrack$ & Recall $\lbrack$Ham$\rbrack$ \\ \hhline{|=|=|=|=|}
-				SVM (Linear Kernel) & 1.171 & \color{red} 0.5509 & \textbf{0.9982} \\ \hline
-				SVM (Approximated RBF Kernel) & 5.552 & 0.1558 & 0.8991 \\ \hline
-				CNN-LSTM (Words) & 0.9444 & 0.9224 & 0.9943 \\ \hline
-				CNN-LSTM (Words+Characters) & 0.9444  & \color{red} 0.8137 &  \textbf{0.9971} \\ \hline
-				\makecell{CNN-LSTM \\(Words+GloVe)} & 0.9444  & \color{ao(english)} 0.9846  & \textbf{0.9929} \\ \hline
-				\makecell{CNN-LSTM \\(Words+Characters+GloVe)} & 0.9444 & \color{ao(english)} 0.9781 & \textbf{0.9930} \\ \hline
+				SVM (Linear Kernel) & 1.100 &  \color{red} 0.6040 & \textbf{0.9982} \\ \hline
+				SVM (Approximated RBF Kernel) & 3.629 & 0.1449 & 0.8659 \\ \hline
+				CNN-LSTM (Words) & 0.9997 & 0.8168 & 0.9976 \\ \hline
+				CNN-LSTM (Words+Characters) & 0.9901 &  \color{red} 0.6979 &  \textbf{0.9982} \\ \hline
+				\makecell{CNN-LSTM \\(Words+GloVe)} & 0.9997  & 0.9247 & 0.9973 \\ \hline
+				\makecell{CNN-LSTM \\(Words+Characters+GloVe)} & 0.9972 & \color{ao(english)} 0.8908 & \textbf{0.9984} \\ \hline
 			\end{tabular}
 			\egroup
 			\caption{Results of optimal threshold analysis}
 		\end{table}
-		\vspace{-10pt}
-		\begin{itemize}
-			\item Trade off between ham and spam recall; either accept low recall for spam or compromise with lower recall for ham
-		\end{itemize}
+	\vspace{-10pt}
+	\begin{itemize}
+		\item Clear trade-off between ham and spam recall exists; most optimal model would be CNN-LSTM with words, characters and GloVe embeddings
+	\end{itemize}
 	\end{frame}
 \end{framefont}
 
@@ -382,7 +382,7 @@
 		\begin{itemize}
 			\setlength\itemsep{1.2em}
 			\item For spam detection, both sequential and non-sequential models are effective
-			\item Trade-off exists between ``ham" and spam recall; an informed decision must be made
+			\item Trade-off exists between ``ham" and spam recall; an informed decision must be made. CNN-LSTM (words+characters+GloVe) performed best in terms of balanced spam and ham recalls
 			\item Both words-based sequential and non-sequential models tend to be robust to new datasets; although sequential models tend to carry richer and more discriminating features
 			\item High cost of training CNN-LSTM; perhaps not economical for a company to deploy GPU on IMAP server
 			\item \textbf{SVM would be a more efficient and scalable option}

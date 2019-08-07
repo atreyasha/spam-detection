@@ -33,7 +33,7 @@ combinedPlotROC <- function(){
       return(store)
     })
     store <- do.call("rbind",store)
-    store$name <- factor(store$name,levels = names(mapping)[c(5,6,1,3,2,4)])
+    store$name <- factor(store$name,levels = names(mapping)[c(5,6,1,2,3,4)])
     # prepare ggplot for combined object
     pdf(paste0("../img/roc_",str,".pdf"), width=12, height=7)
     g <- ggplot(data=store) + 
@@ -95,7 +95,7 @@ combinedPlot <- function(){
   # prepare ggplot for combined object
   pdf("../img/combined.pdf", width=12, height=7)
   g <- ggplot(data=store) + 
-    geom_point(aes(x=recall, y=precision, colour=threshold),size=1.5) +
+    geom_point(aes(x=recall, y=precision, colour=threshold),size=1.2) +
     geom_point(data = optimal, aes(x=recall, y=precision, fill=optimal),size=2, colour="red", alpha = 0.8) +
     geom_line(aes(x=recall, y=precision, colour=threshold),size=0.5) +
     geom_vline(xintercept = 0.998, linetype = "dashed", size = 0.25, colour = "red",alpha=0.6) +
