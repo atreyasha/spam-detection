@@ -13,7 +13,7 @@ font_install('fontcm')
 loadfonts()
 
 ###########################
-# method for combined plot
+# functions for plots
 ###########################
 
 combinedPlotROC <- function(){
@@ -109,7 +109,7 @@ combinedPlot <- function(){
           strip.text = element_text(size = 10,face="bold")) +
     scale_colour_continuous(type = "viridis", guide = "colourbar") +
     # scale_colour_gradientn(colours = terrain.colors(20)) +
-    #scale_colour_viridis_c() +
+    # scale_colour_viridis_c() +
     scale_fill_discrete(name="",
                         breaks=c("optimal"),
                         labels=c("Optimal\nThreshold")) +
