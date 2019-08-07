@@ -1,6 +1,6 @@
 ### Model evaluation
 
-After performing grid-searches on the models, we would need to evaluate our best models with various metrics such as precision, recall, F1 and ROC-AUC. This is particularly important for the task of spam classification, where the costs of misclassifying ham emails are generally much higher than those of misclassifying spam emails. For this, we provide two scripts; namely `model_evaluation.py` and `model_visualization.py`.
+After performing grid-searches on the models, we would need to evaluate our best models with various metrics such as precision, recall, F1 and ROC-AUC. This is particularly important for the task of spam classification, where the costs of misclassifying ham emails are generally much higher than those of misclassifying spam emails. For this, we provide two scripts; namely `model_raw_values.py` and `model_eval_vis.py`.
 
 #### 1. Model probabilities and decision functions
 
