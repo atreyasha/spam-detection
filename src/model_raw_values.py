@@ -59,7 +59,6 @@ def blindRNN(pickle_file,blind_data,text,y_blind,maxlen_words=500,maxlen_char=10
         out = model.predict([X_blind_words,X_blind_char])
     np.save("./pickles/"+pickle_file+"/prob_map_blind.npy", out)
 
-
 def blindSVM(pickle_file,text,y_blind):
     y_svm_blind = deepcopy(y_blind)
     cleaned = tokenize(text)
@@ -79,7 +78,6 @@ def blindSVM(pickle_file,text,y_blind):
         X_blind_words = rbf_feature.fit_transform(X_blind_words)
     out = model.decision_function(X_blind_words)
     np.save("./pickles/"+pickle_file+"/prob_map_blind.npy", out)
-
 
 #############################
 # save prob. maps for models
@@ -126,8 +124,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     # execute main command
     text, blind_data, y_blind = readBlind()
-    _,_, X_test_rnn,_,_,_ = load_data("all")
-    _,_, _, _,X_test_svm,_ = loadData()
+    _,_,X_test_rnn,_,_,_ = load_data("all")
+    _,_,_,_,X_test_svm,_ = loadData()
     files = glob("./pickles/20*")
     # run evaluations based on pickle input
     if args.pickle != "all":
