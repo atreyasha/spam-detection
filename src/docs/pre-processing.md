@@ -22,7 +22,7 @@ optional arguments:
                         <default:5000>
 ```
 
-Running this function will encode the enron-spam dataset in a bag-of-words format. This representation of encodings will be saved in the `./data/svm` directory. An example of running this function is show below:
+Running this function will encode the enron-spam dataset in a bag-of-words format. This representation of encodings will be saved in the `./data/svm` directory. An example of running this function is shown below:
 
 ```shell
 $ python3 bag_words.py
@@ -50,7 +50,7 @@ optional arguments:
                         <default:1000>
 ```
 
-Running this function will encode the enron-spam dataset as integer-based tokens and characters. The two sets of encodings will be saved in the `./data/rnn` directory. An example of running this function is show below:
+Running this function will encode the enron-spam dataset as integer-based tokens and characters. The two sets of encodings will be saved in the `./data/rnn` directory. An example of running this function is shown below:
 
 ```shell
 $ python3 sequence_encode.py
