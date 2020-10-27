@@ -1,4 +1,4 @@
-## Comparison of SVM (non-sequential) vs. CNN-LSTM (sequential) models for supervised spam classification <a href=\"https://colab.research.google.com/github/atreyasha/spam-detection/blob/master/src/spam-detection.ipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>
+## Comparison of SVM (non-sequential) vs. CNN-LSTM (sequential) models for supervised spam classification <a href="https://colab.research.google.com/github/atreyasha/spam-detection/blob/master/src/spam-detection.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
 The central objective of this repository is to investigate whether sequential learning is inherently important for the task of supervised spam classification. This is done by implementing a sequential CNN-LSTM model and comparing it with a non-sequential SVM classifier. Aspects such as generalization accuracy and robustness of these models will be explored in this repository.
 
