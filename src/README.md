@@ -1,4 +1,4 @@
-## Comparison of SVM (non-sequential) vs. CNN-LSTM (sequential) models for supervised spam classification <a href="https://colab.research.google.com/github/AtreyaSh/spam_detection/blob/master/src/enron_spam.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+## Comparison of SVM (non-sequential) vs. CNN-LSTM (sequential) models for supervised spam classification <a href=\"https://colab.research.google.com/github/atreyasha/spam-detection/blob/master/src/spam-detection.ipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>
 
 ### 1. Overview
 
