@@ -23,9 +23,10 @@ This repository's source code was tested with Python versions `3.7.*` and R vers
 2. Install R-based dependencies:
 
     ```R
-    > install.packages(c("RcppCNPy","data.table","ggplot2",latex2exp","extrafont","ggsci","optparse"))
+    > install.packages(c("RcppCNPy","data.table","ggplot2","latex2exp",
+                         "extrafont","ggsci","optparse"))
     ```
-    
+
 ## Workflow
 
 Further information on data pre-processing, the models and results/evaluations can be found in the `/src` directory and the corresponding [readme](/src/README.md).
