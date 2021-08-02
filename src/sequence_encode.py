@@ -18,6 +18,7 @@ from sklearn.model_selection import train_test_split
 # define key functions
 ##############################
 
+
 def read_order(files):
     # read in files
     corpus = []
@@ -28,8 +29,10 @@ def read_order(files):
     corpus = [" ".join(ls) for ls in corpus]
     return corpus
 
+
 def tokenize(obj):
     return [text_to_word_sequence(el) for el in obj]
+
 
 def integerEncode(vocab_size=5000, padding_words=500, padding_chars=1000):
     ham = [filename for filename in Path('./data/enron').glob('**/*ham.txt')]
@@ -39,15 +42,15 @@ def integerEncode(vocab_size=5000, padding_words=500, padding_chars=1000):
     label_ham = [0 for _ in range(len(hamCorpus))]
     label_spam = [1 for _ in range(len(spamCorpus))]
     # separate into training, test
-    ham_train, ham_test, ham_train_labels, ham_test_labels = train_test_split(hamCorpus,
-                                                                              label_ham,test_size=0.33,random_state=42)
-    spam_train, spam_test, spam_train_labels, spam_test_labels = train_test_split(spamCorpus,
-                                                                                  label_spam,test_size=0.33,random_state=42)
+    ham_train, ham_test, ham_train_labels, ham_test_labels = train_test_split(
+        hamCorpus, label_ham, test_size=0.33, random_state=42)
+    spam_train, spam_test, spam_train_labels, spam_test_labels = train_test_split(
+        spamCorpus, label_spam, test_size=0.33, random_state=42)
     # re-separate into training and validation
-    ham_train, ham_valid, ham_train_labels, ham_valid_labels = train_test_split(ham_train,
-                                                                                ham_train_labels,test_size=0.15,random_state=42)
-    spam_train, spam_valid, spam_train_labels, spam_valid_labels = train_test_split(spam_train,
-                                                                                    spam_train_labels,test_size=0.15,random_state=42)
+    ham_train, ham_valid, ham_train_labels, ham_valid_labels = train_test_split(
+        ham_train, ham_train_labels, test_size=0.15, random_state=42)
+    spam_train, spam_valid, spam_train_labels, spam_valid_labels = train_test_split(
+        spam_train, spam_train_labels, test_size=0.15, random_state=42)
     # create train dataset
     X_train = tokenize(ham_train + spam_train)
     y_train = np.array(ham_train_labels + spam_train_labels)
@@ -64,18 +67,24 @@ def integerEncode(vocab_size=5000, padding_words=500, padding_chars=1000):
     # integer encode data from tokens perspective
     tokens_flat = [token for el in X_train for token in el]
     tokens_common = Counter(tokens_flat).most_common()
-    tokens_common = dict(tokens_common[:vocab_size-1])
+    tokens_common = dict(tokens_common[:vocab_size - 1])
     for i, key in enumerate(tokens_common.keys()):
-        tokens_common[key] = i+1
+        tokens_common[key] = i + 1
     # encode training set
-    X_train = pad_sequences([[tokens_common[el] if el in tokens_common.keys() else 0 
-                                      for el in ls] for ls in X_train], maxlen=padding_words)
+    X_train = pad_sequences(
+        [[tokens_common[el] if el in tokens_common.keys() else 0 for el in ls]
+         for ls in X_train],
+        maxlen=padding_words)
     # encode validation set
-    X_valid = pad_sequences([[tokens_common[el] if el in tokens_common.keys() else 0 
-                                      for el in ls] for ls in X_valid],maxlen=padding_words)
+    X_valid = pad_sequences(
+        [[tokens_common[el] if el in tokens_common.keys() else 0 for el in ls]
+         for ls in X_valid],
+        maxlen=padding_words)
     # encode test set
-    X_test = pad_sequences([[tokens_common[el] if el in tokens_common.keys() else 0 
-                                     for el in ls] for ls in X_test],maxlen=padding_words)
+    X_test = pad_sequences(
+        [[tokens_common[el] if el in tokens_common.keys() else 0 for el in ls]
+         for ls in X_test],
+        maxlen=padding_words)
     # save all numpy arrays to file
     np.save("./data/rnn/words/X_train.npy", X_train)
     np.save("./data/rnn/words/X_valid.npy", X_valid)
@@ -92,18 +101,27 @@ def integerEncode(vocab_size=5000, padding_words=500, padding_chars=1000):
     tokens_common = dict(Counter(tokens_flat).most_common())
     for key in list(tokens_common.keys()):
         if tokens_common[key] < 2000:
-            tokens_common.pop(key,None)
+            tokens_common.pop(key, None)
     for i, key in enumerate(tokens_common):
-        tokens_common[key] = i+1
+        tokens_common[key] = i + 1
     # encode training set
-    X_train = pad_sequences([[tokens_common[el.lower()] if el.lower() in tokens_common.keys() else 0 
-                                      for el in ls] for ls in X_train], maxlen=padding_chars)
+    X_train = pad_sequences([[
+        tokens_common[el.lower()] if el.lower() in tokens_common.keys() else 0
+        for el in ls
+    ] for ls in X_train],
+                            maxlen=padding_chars)
     # encode validation set
-    X_valid = pad_sequences([[tokens_common[el.lower()] if el.lower() in tokens_common.keys() else 0 
-                                      for el in ls] for ls in X_valid],maxlen=padding_chars)
+    X_valid = pad_sequences([[
+        tokens_common[el.lower()] if el.lower() in tokens_common.keys() else 0
+        for el in ls
+    ] for ls in X_valid],
+                            maxlen=padding_chars)
     # encode test set
-    X_test = pad_sequences([[tokens_common[el.lower()] if el.lower() in tokens_common.keys() else 0 
-                                     for el in ls] for ls in X_test],maxlen=padding_chars)
+    X_test = pad_sequences([[
+        tokens_common[el.lower()] if el.lower() in tokens_common.keys() else 0
+        for el in ls
+    ] for ls in X_test],
+                           maxlen=padding_chars)
     # save all numpy arrays to file
     np.save("./data/rnn/char/X_train.npy", X_train)
     np.save("./data/rnn/char/X_valid.npy", X_valid)
@@ -112,18 +130,30 @@ def integerEncode(vocab_size=5000, padding_words=500, padding_chars=1000):
     with open("./data/rnn/char/integer_index_char.pickle", "wb") as f:
         pickle.dump(tokens_common, f, protocol=pickle.HIGHEST_PROTOCOL)
 
+
 ##############################
 # main command call
 ##############################
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--vocab-size", type=int, default = 5000,
-                            help="size of vocabulary used in word vector embedding <default:5000>")
-    parser.add_argument("--padding-tokens", type=int, default = 500,
-                        help="maximum length of email padding for tokens <default:500>")
-    parser.add_argument("--padding-char", type=int, default = 1000,
-                        help="maximum length of email padding for characters <default:1000>")
+    parser.add_argument(
+        "--vocab-size",
+        type=int,
+        default=5000,
+        help="size of vocabulary used in word vector embedding <default:5000>")
+    parser.add_argument(
+        "--padding-tokens",
+        type=int,
+        default=500,
+        help="maximum length of email padding for tokens <default:500>")
+    parser.add_argument(
+        "--padding-char",
+        type=int,
+        default=1000,
+        help="maximum length of email padding for characters <default:1000>")
     args = parser.parse_args()
     # execute main command
-    integerEncode(vocab_size=args.vocab_size, padding_words=args.padding_tokens, padding_chars=args.padding_char)
+    integerEncode(vocab_size=args.vocab_size,
+                  padding_words=args.padding_tokens,
+                  padding_chars=args.padding_char)

@@ -8,7 +8,7 @@ import warnings
 import argparse
 import numpy as np
 from glob import glob
-from model_raw_values import readBlind 
+from model_raw_values import readBlind
 from sklearn.metrics import precision_recall_fscore_support, classification_report, roc_auc_score
 from sklearn.metrics import roc_curve
 
@@ -16,117 +16,142 @@ from sklearn.metrics import roc_curve
 # define key functions
 ##############################
 
+
 def optimalThreshold(pr_list):
     pr_list = np.asarray(pr_list)
-    pr_list = pr_list[np.where(pr_list[:,2] != 0)]
-    pr_list = pr_list[np.where(pr_list[:,2] != 1)]
-    loc = np.where(pr_list[:,2]>=0.998)[0]
+    pr_list = pr_list[np.where(pr_list[:, 2] != 0)]
+    pr_list = pr_list[np.where(pr_list[:, 2] != 1)]
+    loc = np.where(pr_list[:, 2] >= 0.998)[0]
     if len(loc) == 0:
-        return pr_list[np.argmax(pr_list[:,2])][0]
+        return pr_list[np.argmax(pr_list[:, 2])][0]
     else:
         filtered = pr_list[loc]
-        return filtered[np.argmax(filtered[:,1])][0]
+        return filtered[np.argmax(filtered[:, 1])][0]
+
 
 def thresholdRNN(pickle_file):
     # pipeline for blind data
-    _,_,y_blind = readBlind()
-    probs = np.load(glob("./pickles/"+pickle_file+"/prob_map_blind.npy")[0])
-    roc = roc_auc_score(y_blind,probs)
+    _, _, y_blind = readBlind()
+    probs = np.load(
+        glob("./pickles/" + pickle_file + "/prob_map_blind.npy")[0])
+    roc = roc_auc_score(y_blind, probs)
     out = np.where(probs >= 0.5, 1, 0)
-    with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
-        f.write("ROC: "+str(roc)+"\n")
-        f.write(classification_report(y_blind,out,digits=4))
-    res = roc_curve(y_blind,probs)
-    np.save("./pickles/"+pickle_file+"/roc_blind.npy",res)
+    with open("./pickles/" + pickle_file + "/classification_report_blind.txt",
+              "w") as f:
+        f.write("ROC: " + str(roc) + "\n")
+        f.write(classification_report(y_blind, out, digits=4))
+    res = roc_curve(y_blind, probs)
+    np.save("./pickles/" + pickle_file + "/roc_blind.npy", res)
     # pipeline for test data
     y_test = np.load("./data/rnn/y_test.npy")
-    probs = np.load(glob("./pickles/"+pickle_file+"/prob_map_test.npy")[0])
-    thresholds = np.linspace(0,1,4000)
+    probs = np.load(glob("./pickles/" + pickle_file + "/prob_map_test.npy")[0])
+    thresholds = np.linspace(0, 1, 4000)
     pr_list = []
     for value in thresholds:
         out = np.where(probs >= value, 1, 0)
-        res = precision_recall_fscore_support(y_test,out)[:2]
-        pr_list.append([value,res[0][0],res[1][0]])
-    with open("./pickles/"+pickle_file+"/precision_recall_test.csv", "w", newline="") as f:
+        res = precision_recall_fscore_support(y_test, out)[:2]
+        pr_list.append([value, res[0][0], res[1][0]])
+    with open("./pickles/" + pickle_file + "/precision_recall_test.csv",
+              "w",
+              newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(i for i in ["threshold","precision","recall"])
+        writer.writerow(i for i in ["threshold", "precision", "recall"])
         writer.writerows(pr_list)
     optimal = optimalThreshold(pr_list)
-    roc = roc_auc_score(y_test,probs)
+    roc = roc_auc_score(y_test, probs)
     out = np.where(probs >= 0.5, 1, 0)
-    with open("./pickles/"+pickle_file+"/classification_report_test.txt", "w") as f:
-        f.write("ROC: "+str(roc)+"\n")
-        f.write(classification_report(y_test,out,digits=4))
+    with open("./pickles/" + pickle_file + "/classification_report_test.txt",
+              "w") as f:
+        f.write("ROC: " + str(roc) + "\n")
+        f.write(classification_report(y_test, out, digits=4))
     out = np.where(probs >= optimal, 1, 0)
-    with open("./pickles/"+pickle_file+"/classification_report_test_optimal.txt", "w") as f:
-        f.write("Optimal threshold: "+str(optimal)+"\n")
-        f.write(classification_report(y_test,out,digits=4))
-    res = roc_curve(y_test,probs)
-    np.save("./pickles/"+pickle_file+"/roc_test.npy",res)
+    with open(
+            "./pickles/" + pickle_file +
+            "/classification_report_test_optimal.txt", "w") as f:
+        f.write("Optimal threshold: " + str(optimal) + "\n")
+        f.write(classification_report(y_test, out, digits=4))
+    res = roc_curve(y_test, probs)
+    np.save("./pickles/" + pickle_file + "/roc_test.npy", res)
+
 
 def thresholdSVM(pickle_file):
     # pipeline for blind data
-    _,_,y_blind = readBlind()
-    y_blind[np.where(y_blind==0)[0]] = -1
-    probs = np.load(glob("./pickles/"+pickle_file+"/prob_map_blind.npy")[0])
-    roc = roc_auc_score(y_blind,probs)
+    _, _, y_blind = readBlind()
+    y_blind[np.where(y_blind == 0)[0]] = -1
+    probs = np.load(
+        glob("./pickles/" + pickle_file + "/prob_map_blind.npy")[0])
+    roc = roc_auc_score(y_blind, probs)
     out = np.where(probs >= 0, 1, -1)
-    with open("./pickles/"+pickle_file+"/classification_report_blind.txt", "w") as f:
-        f.write("ROC: "+str(roc)+"\n")
-        f.write(classification_report(y_blind,out,digits=4))
-    res = roc_curve(y_blind,probs)
-    np.save("./pickles/"+pickle_file+"/roc_blind.npy",res)
+    with open("./pickles/" + pickle_file + "/classification_report_blind.txt",
+              "w") as f:
+        f.write("ROC: " + str(roc) + "\n")
+        f.write(classification_report(y_blind, out, digits=4))
+    res = roc_curve(y_blind, probs)
+    np.save("./pickles/" + pickle_file + "/roc_blind.npy", res)
     # pipeline for test data
     y_test = np.load("./data/svm/y_test.npy")
-    probs = np.load(glob("./pickles/"+pickle_file+"/prob*")[0])
+    probs = np.load(glob("./pickles/" + pickle_file + "/prob*")[0])
     mean = np.mean(probs)
     std = np.std(probs)
-    thresholds = np.linspace(mean-std,mean+std,4000)
+    thresholds = np.linspace(mean - std, mean + std, 4000)
     pr_list = []
     for value in thresholds:
         out = np.where(probs >= value, 1, -1)
-        res = precision_recall_fscore_support(y_test,out)[:2]
-        pr_list.append([value,res[0][0],res[1][0]])
-    with open("./pickles/"+pickle_file+"/precision_recall_test.csv", "w", newline="") as f:
+        res = precision_recall_fscore_support(y_test, out)[:2]
+        pr_list.append([value, res[0][0], res[1][0]])
+    with open("./pickles/" + pickle_file + "/precision_recall_test.csv",
+              "w",
+              newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(i for i in ["threshold","precision","recall"])
+        writer.writerow(i for i in ["threshold", "precision", "recall"])
         writer.writerows(pr_list)
     optimal = optimalThreshold(pr_list)
-    roc = roc_auc_score(y_test,probs)
+    roc = roc_auc_score(y_test, probs)
     out = np.where(probs >= 0, 1, -1)
-    with open("./pickles/"+pickle_file+"/classification_report_test.txt", "w") as f:
-        f.write("ROC: "+str(roc)+"\n")
-        f.write(classification_report(y_test,out,digits=4))
+    with open("./pickles/" + pickle_file + "/classification_report_test.txt",
+              "w") as f:
+        f.write("ROC: " + str(roc) + "\n")
+        f.write(classification_report(y_test, out, digits=4))
     out = np.where(probs >= optimal, 1, -1)
-    with open("./pickles/"+pickle_file+"/classification_report_test_optimal.txt", "w") as f:
-        f.write("Optimal threshold: "+str(optimal)+"\n")
-        f.write(classification_report(y_test,out,digits=4))
-    res = roc_curve(y_test,probs)
-    np.save("./pickles/"+pickle_file+"/roc_test.npy",res)
-        
+    with open(
+            "./pickles/" + pickle_file +
+            "/classification_report_test_optimal.txt", "w") as f:
+        f.write("Optimal threshold: " + str(optimal) + "\n")
+        f.write(classification_report(y_test, out, digits=4))
+    res = roc_curve(y_test, probs)
+    np.save("./pickles/" + pickle_file + "/roc_test.npy", res)
+
+
 def importanceSVM(pickle_file):
-    with open("./data/svm/words/integer_index_tokens.pickle","rb") as f:
+    with open("./data/svm/words/integer_index_tokens.pickle", "rb") as f:
         word_dict = pickle.load(f)
-    full_name = glob("./pickles/"+pickle_file+"/best*")[0]
-    with open(full_name,"rb") as f:
+    full_name = glob("./pickles/" + pickle_file + "/best*")[0]
+    with open(full_name, "rb") as f:
         model = pickle.load(f)
-    word_dict = {v:k for k,v in word_dict.items()}
+    word_dict = {v: k for k, v in word_dict.items()}
     pos_ind = np.where(model.coef_[0] > 0)[0]
     neg_ind = np.where(model.coef_[0] < 0)[0]
-    spam_top = np.abs(model.coef_[0][pos_ind][np.argsort(model.coef_[0][pos_ind])][-10:])
-    ham_top = np.abs(model.coef_[0][neg_ind][np.argsort(model.coef_[0][neg_ind])][:10])
+    spam_top = np.abs(model.coef_[0][pos_ind][np.argsort(
+        model.coef_[0][pos_ind])][-10:])
+    ham_top = np.abs(model.coef_[0][neg_ind][np.argsort(
+        model.coef_[0][neg_ind])][:10])
     pos_ind = pos_ind[np.argsort(model.coef_[0][pos_ind])[-10:]]
     neg_ind = neg_ind[np.argsort(model.coef_[0][neg_ind])[:10]]
     spam_top_words = [word_dict[el] for el in pos_ind]
     ham_top_words = [word_dict[el] for el in neg_ind]
-    with open("./pickles/"+pickle_file+"/spam_top_words.csv", "w", newline="") as f:
+    with open("./pickles/" + pickle_file + "/spam_top_words.csv",
+              "w",
+              newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(i for i in ["word","coefficient"])
-        writer.writerows(zip(ham_top_words,ham_top))
-    with open("./pickles/"+pickle_file+"/ham_top_words.csv", "w", newline="") as f:
+        writer.writerow(i for i in ["word", "coefficient"])
+        writer.writerows(zip(ham_top_words, ham_top))
+    with open("./pickles/" + pickle_file + "/ham_top_words.csv",
+              "w",
+              newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(i for i in ["word","coefficient"])
-        writer.writerows(zip(spam_top_words,spam_top))
+        writer.writerow(i for i in ["word", "coefficient"])
+        writer.writerows(zip(spam_top_words, spam_top))
+
 
 ##############################
 # main command call
@@ -134,14 +159,24 @@ def importanceSVM(pickle_file):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--padding-tokens", type=int, default = 500,
-                        help="maximum length of email padding for tokens <default:500>")
-    parser.add_argument("--padding-char", type=int, default = 1000,
-                        help="maximum length of email padding for characters <default:1000>")
+    parser.add_argument(
+        "--padding-tokens",
+        type=int,
+        default=500,
+        help="maximum length of email padding for tokens <default:500>")
+    parser.add_argument(
+        "--padding-char",
+        type=int,
+        default=1000,
+        help="maximum length of email padding for characters <default:1000>")
     requiredNamed = parser.add_argument_group('required named arguments')
-    requiredNamed.add_argument('-p', '--pickle', type=str,
-                               help="pickle directory name for stored model, or input 'all' to run on all models", 
-                               required=True)
+    requiredNamed.add_argument(
+        '-p',
+        '--pickle',
+        type=str,
+        help=
+        "pickle directory name for stored model, or input 'all' to run on all models",
+        required=True)
     args = parser.parse_args()
     files = glob("./pickles/20*")
     # run evaluations based on pickle input
