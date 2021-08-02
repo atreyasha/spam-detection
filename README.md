@@ -31,9 +31,9 @@ This repository's source code was tested with Python versions `3.7.*` and R vers
 
 Further information on data pre-processing, the models and results/evaluations can be found in the `/src` directory and the corresponding [readme](/src/README.md).
 
-## Citation
+## Reference
 
-Below is the BibTeX citation for Metsis et al. 2006, which is the paper published alongside the pre-processed enron dataset in this repository.
+Below is the BibTeX entry for Metsis et al. 2006, which is the paper published alongside the pre-processed enron dataset in this repository.
 
 ```
 @inproceedings{metsis2006spam,
@@ -46,7 +46,3 @@ Below is the BibTeX citation for Metsis et al. 2006, which is the paper publishe
   organization={Mountain View, CA}
 }
 ```
-
-## Author
-
-Atreya Shankar, Cognitive Systems 2018
