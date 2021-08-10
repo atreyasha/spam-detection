@@ -58,7 +58,7 @@ $ python3 sequence_encode.py
 
 #### 3. GloVe embedded matrix generation
 
-In order to test/use the GloVe word and character embeddings, we would need to match the GloVe words to our own vocabulary. `embedding_matrix_gen.py` automatically does this for us and also approximates GloVe character embeddings using a methodology from Max Woolf's github repository (https://github.com/minimaxir/char-embeddings). To create the embedding matrices, run the following:
+In order to test/use the GloVe word and character embeddings, we would need to match the GloVe words to our own vocabulary. `embedding_matrix_gen.py` automatically does this for us and also approximates GloVe character embeddings using a methodology from [`char-embeddings`](https://github.com/minimaxir/char-embeddings), which is distributed under the MIT [License](../../THIRD_PARTY_NOTICES.txt). To create the embedding matrices, run the following:
 
 ```shell
 $ python3 embedding_matrix_gen.py
