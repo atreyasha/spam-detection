@@ -2,7 +2,7 @@
 
 The central objective of this repository is to investigate whether sequential learning is inherently important for the task of supervised spam classification. This is done by implementing a sequential CNN-LSTM model and comparing it with a non-sequential SVM classifier. Aspects such as generalization accuracy and robustness of these models will be explored in this repository.
 
-The models will be trained on the pre-processed `enron-spam` dataset (http://www2.aueb.gr/users/ion/data/enron-spam/), consisting of ~34k instances of roughly balanced "ham" and spam emails.
+The models will be trained on the pre-processed `enron-spam` [dataset](http://www2.aueb.gr/users/ion/data/enron-spam/), consisting of ~34k instances of roughly balanced "ham" and spam emails.
 
 To initialize this repository, it is recommended to enable a pre-commit hook which updates python dependencies in `requirements.txt`.
 
